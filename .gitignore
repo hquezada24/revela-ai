@@ -1,0 +1,64 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# =========================
+# Frontend (Next.js)
+# =========================
+
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Yarn / PnP
+frontend/.pnp
+frontend/.pnp.*
+frontend/.yarn/*
+!frontend/.yarn/patches
+!frontend/.yarn/plugins
+!frontend/.yarn/releases
+!frontend/.yarn/versions
+
+# Coverage
+frontend/coverage/
+
+# =========================
+# Backend (FastAPI)
+# =========================
+
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/.coverage
+
+# =========================
+# Environment variables
+# =========================
+
+frontend/.env*
+backend/.env*
+
+# Mantener ejemplos
+!frontend/.env.example
+!backend/.env.example
+
+# =========================
+# Logs
+# =========================
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# =========================
+# Misc
+# =========================
+
+.DS_Store
+Thumbs.db
+*.pem
