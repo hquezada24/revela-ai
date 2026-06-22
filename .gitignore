@@ -62,3 +62,7 @@ yarn-error.log*
 .DS_Store
 Thumbs.db
 *.pem
+
+.cursor/
+CLAUDE.md
+AGENTS.md
