@@ -17,7 +17,13 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-const NAV_LINKS = ["Features", "How It Works", "Gallery", "Pricing"];
+const NAV_LINKS = [
+  "Features",
+  "AI Models",
+  "How It Works",
+  "Gallery",
+  "Pricing",
+];
 const LANGUAGES = [
   { code: "EN", label: "English", flag: "🇺🇸" },
   { code: "ES", label: "Español", flag: "🇪🇸" },
@@ -81,9 +87,43 @@ const FEATURE_ITEMS = [
   },
 ];
 
+const AI_MODELS = [
+  {
+    name: "GPT Image 2",
+    desc: "Latest model",
+    image: "/models/gpt-image-2.png",
+  },
+  {
+    name: "SD3",
+    desc: "Stable Diffusion 3",
+    image: "/models/sd3.png",
+  },
+  {
+    name: "MJ6",
+    desc: "Midjourney 6",
+    image: "/models/mj6.png",
+  },
+  {
+    name: "Grok Imagine",
+    desc: "xAI's newest model",
+    image: "/models/grok-imagine.png",
+  },
+  {
+    name: "Sora 3",
+    desc: "OpenAI's newest model",
+    image: "/models/sora-3.png",
+  },
+  {
+    name: "Claude Sonnet 5",
+    desc: "Anthropic's newest model",
+    image: "/models/claude-sonnet-5.png",
+  },
+];
+
 function Header() {
   const [langOpen, setLangOpen] = useState(false);
   const [featuresOpen, setFeaturesOpen] = useState(false);
+  const [modelsOpen, setModelsOpen] = useState(false);
   const [lang, setLang] = useState("EN");
   const [mobileOpen, setMobileOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -236,10 +276,122 @@ function Header() {
               );
             }
 
+            if (link === "AI Models") {
+              return (
+                <div
+                  key={link}
+                  className="relative h-full flex items-center"
+                  onMouseEnter={() => setModelsOpen(true)}
+                  onMouseLeave={() => setModelsOpen(false)}
+                >
+                  <button
+                    className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
+                    style={{
+                      fontFamily: FONT_UI,
+                      fontWeight: 500,
+                      color: modelsOpen ? C.text : C.muted,
+                      background: modelsOpen
+                        ? "rgba(255,255,255,0.06)"
+                        : "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span>{link}</span>
+                    <ChevronDown
+                      size={12}
+                      style={{
+                        transform: modelsOpen ? "rotate(180deg)" : "rotate(0)",
+                        transition: "transform 0.2s",
+                      }}
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    className="absolute left-0 w-[540px] rounded-3xl p-6 grid grid-cols-2 gap-4 transition-all duration-200"
+                    style={{
+                      top: "calc(100% - 10px)",
+                      zIndex: 60,
+                      background: "#130B24",
+                      border: `1px solid ${C.border}`,
+                      boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+                      pointerEvents: modelsOpen ? "auto" : "none",
+                      opacity: modelsOpen ? 1 : 0,
+                      transform: `translateY(${modelsOpen ? 0 : -6}px)`,
+                    }}
+                  >
+                    {AI_MODELS.map((item) => {
+                      // const Icon = item.icon;
+                      return (
+                        <a
+                          key={item.name}
+                          href="#features"
+                          onClick={() => setModelsOpen(false)}
+                          className="group flex gap-4 rounded-2xl p-3 transition-colors duration-200 hover:bg-[rgba(255,255,255,0.04)]"
+                          style={{ textDecoration: "none" }}
+                        >
+                          <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200"
+                            style={{
+                              background: "rgba(255,255,255,0.05)",
+                              border: `1px solid ${C.border}`,
+                            }}
+                          >
+                            {/* <Icon
+                              size={16}
+                              style={{ color: C.pink }}
+                              className="group-hover:scale-110 transition-transform duration-200"
+                            /> */}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="text-sm font-semibold transition-colors duration-200 group-hover:text-white"
+                                style={{ fontFamily: FONT_UI, color: C.text }}
+                              >
+                                {item.name}
+                              </span>
+                              {/* {item.tag && (
+                                <span
+                                  className="rounded px-1.5 py-0.5 text-[9px] font-bold"
+                                  style={{
+                                    background: item.color,
+                                    color: item.textColor,
+                                    border: `1px solid ${item.border}`,
+                                  }}
+                                >
+                                  {item.tag}
+                                </span>
+                              )} */}
+                            </div>
+                            <p
+                              className="text-xs mt-0.5"
+                              style={{
+                                fontFamily: FONT_UI,
+                                color: C.muted,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {item.desc}
+                            </p>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <a
                 key={link}
-                href={link === "Pricing" ? "/pricing" : `#${link.toLowerCase().replace(/ /g, "-")}`}
+                href={
+                  link === "Pricing"
+                    ? "/pricing"
+                    : `#${link.toLowerCase().replace(/ /g, "-")}`
+                }
                 className="rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
                 style={{
                   fontFamily: FONT_UI,
@@ -374,7 +526,11 @@ function Header() {
           {NAV_LINKS.map((link) => (
             <a
               key={link}
-              href={link === "Pricing" ? "/pricing" : `#${link.toLowerCase().replace(/ /g, "-")}`}
+              href={
+                link === "Pricing"
+                  ? "/pricing"
+                  : `#${link.toLowerCase().replace(/ /g, "-")}`
+              }
               onClick={() => setMobileOpen(false)}
               className="flex w-full items-center rounded-xl px-4 py-3 text-sm"
               style={{
