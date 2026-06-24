@@ -3,7 +3,19 @@ import { useState, useRef, useCallback } from "react";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import useClickOutside from "@/hooks/useClickOutside";
-import { Globe, ChevronDown, ArrowRight, Menu, X } from "lucide-react";
+import {
+  Globe,
+  ChevronDown,
+  ArrowRight,
+  Menu,
+  X,
+  Camera,
+  Scissors,
+  Shirt,
+  Sparkles,
+  Palette,
+  MessageSquare,
+} from "lucide-react";
 
 const NAV_LINKS = ["Features", "How It Works", "Gallery", "Pricing"];
 const LANGUAGES = [
@@ -14,8 +26,64 @@ const LANGUAGES = [
   { code: "JA", label: "日本語", flag: "🇯🇵" },
 ];
 
+const FEATURE_ITEMS = [
+  {
+    name: "Professional Photos",
+    desc: "HD portraits & executive headshots",
+    icon: Camera,
+    color: "rgba(236,72,153,0.12)",
+    textColor: "#EC4899",
+    border: "rgba(236,72,153,0.25)",
+    tag: "HD",
+  },
+  {
+    name: "Hair Studio",
+    desc: "Simulate haircuts & shape matches",
+    icon: Scissors,
+    color: "rgba(109,40,217,0.12)",
+    textColor: "#A78BFA",
+    border: "rgba(109,40,217,0.25)",
+    tag: "3D",
+  },
+  {
+    name: "Virtual Try-On",
+    desc: "Try styles and coordinate apparel",
+    icon: Shirt,
+    color: "rgba(245,158,11,0.12)",
+    textColor: "#F59E0B",
+    border: "rgba(245,158,11,0.25)",
+    tag: "PBR",
+  },
+  {
+    name: "Makeup Studio",
+    desc: "Discover real-time color palettes",
+    icon: Sparkles,
+    color: "rgba(168,85,247,0.12)",
+    textColor: "#C084FC",
+    border: "rgba(168,85,247,0.25)",
+  },
+  {
+    name: "AI Stylist",
+    desc: "Chat with your fashion consultant",
+    icon: MessageSquare,
+    color: "rgba(59,130,246,0.12)",
+    textColor: "#60A5FA",
+    border: "rgba(59,130,246,0.25)",
+    tag: "AI",
+  },
+  {
+    name: "Color Analysis",
+    desc: "Identify your seasonal tone match",
+    icon: Palette,
+    color: "rgba(16,185,129,0.12)",
+    textColor: "#34D399",
+    border: "rgba(16,185,129,0.25)",
+  },
+];
+
 function Header() {
   const [langOpen, setLangOpen] = useState(false);
+  const [featuresOpen, setFeaturesOpen] = useState(false);
   const [lang, setLang] = useState("EN");
   const [mobileOpen, setMobileOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
@@ -56,22 +124,134 @@ function Header() {
         </a>
 
         {/* Centre nav */}
-        <nav className="hidden lg:flex items-center gap-1 flex-1">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link}
-              href={`#${link.toLowerCase().replace(/ /g, "-")}`}
-              className="rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
-              style={{
-                fontFamily: FONT_UI,
-                fontWeight: 500,
-                color: C.muted,
-                textDecoration: "none",
-              }}
-            >
-              {link}
-            </a>
-          ))}
+        <nav className="hidden lg:flex items-center gap-1 flex-1 h-full">
+          {NAV_LINKS.map((link) => {
+            if (link === "Features") {
+              return (
+                <div
+                  key={link}
+                  className="relative h-full flex items-center"
+                  onMouseEnter={() => setFeaturesOpen(true)}
+                  onMouseLeave={() => setFeaturesOpen(false)}
+                >
+                  <button
+                    className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
+                    style={{
+                      fontFamily: FONT_UI,
+                      fontWeight: 500,
+                      color: featuresOpen ? C.text : C.muted,
+                      background: featuresOpen
+                        ? "rgba(255,255,255,0.06)"
+                        : "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <span>{link}</span>
+                    <ChevronDown
+                      size={12}
+                      style={{
+                        transform: featuresOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0)",
+                        transition: "transform 0.2s",
+                      }}
+                    />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div
+                    className="absolute left-0 w-[540px] rounded-3xl p-6 grid grid-cols-2 gap-4 transition-all duration-200"
+                    style={{
+                      top: "calc(100% - 10px)",
+                      zIndex: 60,
+                      background: "#130B24",
+                      border: `1px solid ${C.border}`,
+                      boxShadow: "0 24px 64px rgba(0,0,0,0.6)",
+                      pointerEvents: featuresOpen ? "auto" : "none",
+                      opacity: featuresOpen ? 1 : 0,
+                      transform: `translateY(${featuresOpen ? 0 : -6}px)`,
+                    }}
+                  >
+                    {FEATURE_ITEMS.map((item) => {
+                      const Icon = item.icon;
+                      return (
+                        <a
+                          key={item.name}
+                          href="#features"
+                          onClick={() => setFeaturesOpen(false)}
+                          className="group flex gap-4 rounded-2xl p-3 transition-colors duration-200 hover:bg-[rgba(255,255,255,0.04)]"
+                          style={{ textDecoration: "none" }}
+                        >
+                          <div
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors duration-200"
+                            style={{
+                              background: "rgba(255,255,255,0.05)",
+                              border: `1px solid ${C.border}`,
+                            }}
+                          >
+                            <Icon
+                              size={16}
+                              style={{ color: C.pink }}
+                              className="group-hover:scale-110 transition-transform duration-200"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className="text-sm font-semibold transition-colors duration-200 group-hover:text-white"
+                                style={{ fontFamily: FONT_UI, color: C.text }}
+                              >
+                                {item.name}
+                              </span>
+                              {item.tag && (
+                                <span
+                                  className="rounded px-1.5 py-0.5 text-[9px] font-bold"
+                                  style={{
+                                    background: item.color,
+                                    color: item.textColor,
+                                    border: `1px solid ${item.border}`,
+                                  }}
+                                >
+                                  {item.tag}
+                                </span>
+                              )}
+                            </div>
+                            <p
+                              className="text-xs mt-0.5"
+                              style={{
+                                fontFamily: FONT_UI,
+                                color: C.muted,
+                                lineHeight: 1.4,
+                              }}
+                            >
+                              {item.desc}
+                            </p>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <a
+                key={link}
+                href={`#${link.toLowerCase().replace(/ /g, "-")}`}
+                className="rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
+                style={{
+                  fontFamily: FONT_UI,
+                  fontWeight: 500,
+                  color: C.muted,
+                  textDecoration: "none",
+                }}
+              >
+                {link}
+              </a>
+            );
+          })}
         </nav>
 
         {/* Right */}
