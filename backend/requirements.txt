@@ -1,0 +1,54 @@
+fastapi
+uvicorn[standard]
+
+# Configuration
+
+pydantic
+pydantic-settings
+python-dotenv
+
+# Database
+
+sqlalchemy
+alembic
+psycopg[binary]
+
+# Authentication & Security
+
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+python-multipart
+
+# Redis & Background Jobs
+
+redis
+dramatiq
+
+# Storage & File Handling
+
+boto3
+pillow
+
+# HTTP Clients
+
+httpx
+
+# AI / Computer Vision Utilities
+
+opencv-python
+mediapipe
+
+# Validation & Serialization
+
+email-validator
+
+# Development & Testing
+
+pytest
+pytest-asyncio
+
+# Code Quality
+
+ruff
+mypy
