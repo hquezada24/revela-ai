@@ -47,7 +47,7 @@ class Subscription(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow,
+        default=datetime.now(datetime.timezone.utc),
     )
 
     user = relationship("User", back_populates="subscriptions")
