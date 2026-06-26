@@ -42,6 +42,7 @@ backend/alembic/__pycache__/
 *.pyo
 *.pyd
 .pytest_cache/
+__pycache__/
 
 .DS_Store
 Thumbs.db
