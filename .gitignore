@@ -34,6 +34,19 @@ backend/.pytest_cache/
 backend/.mypy_cache/
 backend/.ruff_cache/
 backend/.coverage
+backend/app/__pycache__/
+backend/alembic/__pycache__/
+
+*/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+.DS_Store
+Thumbs.db
+*.log
+*.sqlite3
 
 # =========================
 # Environment variables
