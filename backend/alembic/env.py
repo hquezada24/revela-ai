@@ -4,6 +4,15 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from app.db.base import Base
 from alembic import context
+import os
+from dotenv import load_dotenv
+
+# Esto carga tu archivo .env
+load_dotenv()
+
+# Ahora Alembic puede leer la variable de entorno
+config = context.config
+config.set_main_option("DATABASE_URL", os.getenv("DATABASE_URL"))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
