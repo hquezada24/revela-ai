@@ -1,8 +1,10 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
+import Link from "next/link";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import useClickOutside from "@/hooks/useClickOutside";
+import LoginDialog from "@/components/auth/LoginDialog";
 import {
   Globe,
   ChevronDown,
@@ -126,6 +128,7 @@ function Header() {
   const [modelsOpen, setModelsOpen] = useState(false);
   const [lang, setLang] = useState("EN");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
   useClickOutside(
     langRef,
@@ -134,6 +137,7 @@ function Header() {
   const currentLang = LANGUAGES.find((l) => l.code === lang)!;
 
   return (
+  <>
     <header
       className="sticky top-0 z-50 w-full"
       style={{
@@ -482,22 +486,25 @@ function Header() {
           <div style={{ width: 1, height: 18, background: C.border }} />
 
           <button
+            onClick={() => setLoginOpen(true)}
             className="rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
             style={{ fontFamily: FONT_UI, color: C.muted }}
           >
             Log in
           </button>
 
-          <button
-            className="flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:[box-shadow: 0 8px 28px rgba(109,40,217,0.52)]"
+          <Link
+            href="/signup"
+            className="flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5"
             style={{
               fontFamily: FONT_UI,
               background: C.grad,
               boxShadow: "0 4px 16px rgba(109,40,217,0.4)",
+              textDecoration: "none",
             }}
           >
             Try Free <ArrowRight size={13} />
-          </button>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -544,27 +551,35 @@ function Header() {
             </a>
           ))}
           <div className="flex items-center gap-2.5 pt-3">
-            <button
-              className="flex-1 rounded-xl py-2.5 text-sm font-semibold border"
+            <Link
+              href="/login"
+              onClick={() => setMobileOpen(false)}
+              className="flex-1 rounded-xl py-2.5 text-sm font-semibold border text-center"
               style={{
                 fontFamily: FONT_UI,
                 color: C.text,
                 borderColor: C.border,
+                textDecoration: "none",
               }}
             >
               Log in
-            </button>
-            <button
-              className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white"
-              style={{ fontFamily: FONT_UI, background: C.grad }}
+            </Link>
+            <Link
+              href="/signup"
+              onClick={() => setMobileOpen(false)}
+              className="flex-1 rounded-xl py-2.5 text-sm font-bold text-white text-center"
+              style={{ fontFamily: FONT_UI, background: C.grad, textDecoration: "none" }}
             >
               Try Free
-            </button>
+            </Link>
           </div>
         </div>
       </div>
     </header>
-  );
+
+    {/* Desktop login dialog */}
+    <LoginDialog open={loginOpen} onClose={() => setLoginOpen(false)} />
+  </>);
 }
 
 export default Header;
