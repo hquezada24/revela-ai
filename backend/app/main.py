@@ -5,13 +5,9 @@ from typing import Annotated
 from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import SQLModel, Session
 from starlette import status
-
 from app.db.database import engine, get_session
 from app.core.auth import router, get_current_user
-
-# Importar todos los modelos para que SQLModel los registre en su metadata
-# antes de llamar a create_all().
-import app.models  # noqa: F401
+from app.api.v1.endpoints import auth
 
 app = FastAPI(title="Revela AI API")
 
@@ -28,10 +24,7 @@ SQLModel.metadata.create_all(engine)
 db_dependency = Annotated[Session, Depends(get_session)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
-
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def root(user: user_dependency, db: db_dependency):
