@@ -1,17 +1,11 @@
-import uuid
-from datetime import datetime
-from typing import Any
+# app/models/transformations.py
 
-from sqlalchemy import (
-    String,
-    Text,
-    DateTime,
-    ForeignKey,
-)
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
+from typing import Any, Optional, TYPE_CHECKING
+
+from sqlmodel import SQLModel, Field, Relationship, JSON, Column
 from enum import Enum
-from app.db.base import Base
+
 
 class TransformationCategory(str, Enum):
     VIRTUAL_TRY_ON = "virtual_try_on"
@@ -24,44 +18,25 @@ class TransformationCategory(str, Enum):
     PROFESSIONAL_PHOTOS = "professional_photos"
 
 
-class Transformation(Base):
-    __tablename__ = "transformations"
+class Transformation(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    category: TransformationCategory
+
+    prompt: str
+
+    result_image_url: Optional[str] = None
+
+    settings: Optional[dict[str, Any]] = Field(
+        default=None,
+        sa_column=Column(JSON),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
     )
 
-    photo_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("photos.id", ondelete="SET NULL"),
-    )
-
-    job_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("jobs.id", ondelete="SET NULL"),
-    )
-
-    category: Mapped[TransformationCategory] = mapped_column(
-        nullable=False,
-    )
-
-    prompt: Mapped[str | None] = mapped_column(
-        Text,
-    )
-
-    result_image_url: Mapped[str | None]
-
-    settings: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB,
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    user = relationship("User", back_populates="transformations")
+    # Relationships (FKs)
+    user_id: int | None = Field(default=None, foreign_key="user.id")
+    photo_id: int | None = Field(default=None, foreign_key="photo.id")
+    job_id: int | None = Field(default=None, foreign_key="job.id")

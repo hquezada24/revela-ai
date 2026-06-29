@@ -1,46 +1,27 @@
-import uuid
-from datetime import datetime
+# app/models/glow_up_plans.py
+
+from datetime import datetime, timezone
 from typing import Any
 
-from sqlalchemy import String, Numeric, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-from app.db.base import Base
+from sqlmodel import SQLModel, Field, Column, JSON
 
 
-class GlowUpPlan(Base):
-    __tablename__ = "glow_up_plans"
+class GlowUpPlan(SQLModel, table=True):
+    __tablename__ = "glowupplan"  # SQLModel usa el nombre de clase en minúsculas por defecto
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    id: int | None = Field(default=None, primary_key=True)
+
+    user_id: int = Field(foreign_key="user.id")
+
+    goal: str = Field(max_length=100)
+
+    budget: float | None = None
+
+    recommendations: dict[str, Any] | None = Field(
+        default=None,
+        sa_column=Column(JSON),
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-    )
-
-    goal: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
-
-    budget: Mapped[float | None] = mapped_column(
-        Numeric(10, 2),
-    )
-
-    recommendations: Mapped[dict[str, Any] | None] = mapped_column(
-        JSONB,
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    user = relationship(
-        "User",
-        back_populates="glow_up_plans",
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )

@@ -1,28 +1,37 @@
-# main.py
+# app/main.py
+
+from typing import Annotated
 
 from fastapi import FastAPI, Depends, HTTPException
-from app.core.auth import router
-from sqlalchemy.orm import Session
+from sqlmodel import SQLModel, Session
 from starlette import status
-from app.db.base import Base
-from app.db.database import SessionLocal, engine
-from typing import Annotated
-from app.core.auth import get_current_user
 
-app = FastAPI()
+from app.db.database import engine, get_session
+from app.core.auth import router, get_current_user
+
+# Importar todos los modelos para que SQLModel los registre en su metadata
+# antes de llamar a create_all().
+import app.models  # noqa: F401
+
+app = FastAPI(title="Revela AI API")
+
 app.include_router(router)
 
-Base.metadata.create_all(bind=engine)
+# Crear todas las tablas si no existen (útil en desarrollo).
+# En producción se usa Alembic para migraciones.
+SQLModel.metadata.create_all(engine)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# ---------------------------------------------------------------------------
+# Dependencias globales
+# ---------------------------------------------------------------------------
 
-db_dependency = Annotated[Session, Depends(get_db)]
+db_dependency = Annotated[Session, Depends(get_session)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def root(user: user_dependency, db: db_dependency):

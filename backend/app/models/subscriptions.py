@@ -1,53 +1,27 @@
-import uuid
-from datetime import datetime
+# app/models/subscriptions.py
 
-from sqlalchemy import String, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 
-from app.db.base import Base
+from sqlmodel import SQLModel, Field
 
 
-class Subscription(Base):
-    __tablename__ = "subscriptions"
+class Subscription(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    user_id: int = Field(foreign_key="user.id")
+
+    plan: str = Field(max_length=50)
+
+    status: str = Field(max_length=50)
+
+    provider: str | None = Field(default=None, max_length=50)
+
+    provider_subscription_id: str | None = Field(default=None, max_length=255)
+
+    current_period_start: datetime | None = None
+
+    current_period_end: datetime | None = None
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-
-    plan: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-    )
-
-    status: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-    )
-
-    provider: Mapped[str | None] = mapped_column(
-        String(50),
-        nullable=True,
-    )
-
-    provider_subscription_id: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
-
-    current_period_start: Mapped[datetime | None]
-    current_period_end: Mapped[datetime | None]
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    user = relationship("User", back_populates="subscriptions")

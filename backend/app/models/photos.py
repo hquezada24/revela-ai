@@ -1,61 +1,29 @@
-import uuid
-from datetime import datetime
+# app/models/photos.py
 
-from sqlalchemy import (
-    String,
-    DateTime,
-    Integer,
-    BigInteger,
-    Boolean,
-    ForeignKey,
-)
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 
-from app.db.base import Base
+from sqlmodel import SQLModel, Field
 
 
-class Photo(Base):
-    __tablename__ = "photos"
+class Photo(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    user_id: int = Field(foreign_key="user.id")
+
+    storage_key: str
+
+    public_url: str | None = None
+
+    width: int | None = None
+
+    height: int | None = None
+
+    mime_type: str | None = None
+
+    file_size_bytes: int | None = None
+
+    is_deleted: bool = Field(default=False)
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-
-    storage_key: Mapped[str] = mapped_column(
-        nullable=False,
-    )
-
-    public_url: Mapped[str | None]
-
-    width: Mapped[int | None] = mapped_column(Integer)
-
-    height: Mapped[int | None] = mapped_column(Integer)
-
-    mime_type: Mapped[str | None] = mapped_column(
-        String(100),
-    )
-
-    file_size_bytes: Mapped[int | None] = mapped_column(
-        BigInteger,
-    )
-
-    is_deleted: Mapped[bool] = mapped_column(
-        Boolean,
-        default=False,
-        nullable=False,
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    user = relationship("User", back_populates="photos")

@@ -9,6 +9,7 @@ python-dotenv
 
 # Database
 
+sqlmodel
 sqlalchemy
 alembic
 psycopg[binary]
@@ -16,8 +17,7 @@ psycopg[binary]
 # Authentication & Security
 
 python-jose[cryptography]
-passlib[bcrypt]
-bcrypt
+pwdlib[bcrypt]
 python-multipart
 
 # Redis & Background Jobs

@@ -1,45 +1,23 @@
-import uuid
-from datetime import datetime
+# app/models/stylist_conversations.py
 
-from sqlalchemy import String, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 
-from app.db.base import Base
+from sqlmodel import SQLModel, Field
 
 
-class StylistConversation(Base):
-    __tablename__ = "stylist_conversations"
+class StylistConversation(SQLModel, table=True):
+    __tablename__ = "stylistconversation"  # SQLModel usa el nombre de clase en minúsculas por defecto
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
+    id: int | None = Field(default=None, primary_key=True)
+
+    user_id: int = Field(foreign_key="user.id")
+
+    title: str | None = Field(default=None, max_length=255)
+
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
-    )
-
-    title: Mapped[str | None] = mapped_column(
-        String(255),
-    )
-
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-        onupdate=datetime.now(datetime.timezone.utc),
-    )
-
-    user = relationship("User", back_populates="conversations")
-
-    messages = relationship(
-        "StylistMessage",
-        back_populates="conversation",
-        cascade="all, delete-orphan",
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )

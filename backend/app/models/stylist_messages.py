@@ -1,45 +1,21 @@
-import uuid
-from datetime import datetime
+# app/models/stylist_messages.py
 
-from sqlalchemy import Text, String, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from datetime import datetime, timezone
 
-from app.db.base import Base
+from sqlmodel import SQLModel, Field
 
 
-class StylistMessage(Base):
-    __tablename__ = "stylist_messages"
+class StylistMessage(SQLModel, table=True):
+    __tablename__ = "stylistmessage"  # SQLModel usa el nombre de clase en minúsculas por defecto
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-    )
+    id: int | None = Field(default=None, primary_key=True)
 
-    conversation_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey(
-            "stylist_conversations.id",
-            ondelete="CASCADE",
-        ),
-    )
+    conversation_id: int = Field(foreign_key="stylistconversation.id")
 
-    role: Mapped[str] = mapped_column(
-        String(20),
-        nullable=False,
-    )
+    role: str = Field(max_length=20)
 
-    content: Mapped[str] = mapped_column(
-        Text,
-        nullable=False,
-    )
+    content: str
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime,
-        default=datetime.now(datetime.timezone.utc),
-    )
-
-    conversation = relationship(
-        "StylistConversation",
-        back_populates="messages",
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
     )
