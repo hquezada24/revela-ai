@@ -9,20 +9,17 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-# Importar todos los modelos para que Alembic los detecte en autogenerate
-import app.models  # noqa: F401
-
 # Configuración de Alembic
 config = context.config
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+config.set_main_option("DATABASE_URL", os.getenv("DATABASE_URL"))
 
 # Configurar logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+config = context.config
 # SQLModel.metadata contiene las definiciones de todas las tablas
 target_metadata = SQLModel.metadata
-
 
 def run_migrations_offline() -> None:
     """Ejecutar migraciones en modo 'offline' (sin conexión activa al DB)."""
