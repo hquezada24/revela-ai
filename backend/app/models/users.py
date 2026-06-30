@@ -1,21 +1,12 @@
 # app/models/users.py
 
 from datetime import datetime, timezone
+from backend.app.schemas.user import UserCreate
+from sqlmodel import Field
 
-from sqlmodel import Field, SQLModel
-
-class User(SQLModel, table=True):
+class User(UserCreate, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    password: str = Field(nullable=False)
-    age: int | None = Field(default=None, index=True, min_length=18, max_length=100)
-    email: str = Field(index=True, unique=True, nullable=False)
-    profile_photo_url: str | None 
-    preferred_language: str = Field(
-        nullable=False,
-        min_length=2, 
-        max_length=2,
-        default="en",
-    )
+    
     onboarding_completed: bool = Field(
         default=False,
     )
