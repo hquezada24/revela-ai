@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from app.models.users import User
 from pwdlib import PasswordHash
-from app.schemas.user_create import UserAuthentication
+from app.schemas.user import UserAuthentication
 
 password_hash = PasswordHash.recommended()
 
