@@ -1,11 +1,13 @@
 # app/models/users.py
 
 from datetime import datetime, timezone
-from app.schemas.user import UserCreate
+from app.schemas.user import UserBase
 from sqlmodel import Field
 
-class User(UserCreate, table=True):
+class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+
+    hashed_password = str
     
     onboarding_completed: bool = Field(
         default=False,
