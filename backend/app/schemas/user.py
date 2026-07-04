@@ -21,10 +21,15 @@ class UserRead(UserBase):
     onboarding_completed: bool
     created_at: datetime
 
+# Create User
 class UserCreate(UserBase):
-    hashed_password: str
+    password: str
 
 # User Authentication
 class UserAuthentication(SQLModel):
     email: str
+    password: str
+
+# Delete account request body
+class DeleteAccountRequest(SQLModel):
     password: str
