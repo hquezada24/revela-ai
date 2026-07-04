@@ -1,7 +1,7 @@
 # app/models/users.py
 
 from datetime import datetime, timezone
-from backend.app.schemas.user import UserCreate
+from app.schemas.user import UserCreate
 from sqlmodel import Field
 
 class User(UserCreate, table=True):
