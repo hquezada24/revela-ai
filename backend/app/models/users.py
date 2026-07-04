@@ -7,7 +7,7 @@ from sqlmodel import Field
 class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    hashed_password = str
+    hashed_password: str
     
     onboarding_completed: bool = Field(
         default=False,
