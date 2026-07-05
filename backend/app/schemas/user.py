@@ -27,8 +27,12 @@ class UserCreate(UserBase):
 
 # User Authentication
 class UserAuthentication(SQLModel):
-    email: str
+    username: str
     password: str
+
+class CurrentUser(SQLModel):
+    email: str
+    id: int
 
 # Delete account request body
 class DeleteAccountRequest(SQLModel):

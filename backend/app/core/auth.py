@@ -7,6 +7,7 @@ from jose import jwt, JWTError
 from starlette import status
 import os
 from dotenv import load_dotenv
+from app.schemas.user import CurrentUser
 
 load_dotenv()
 
@@ -19,7 +20,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> dict:
+def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> CurrentUser:
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
@@ -29,7 +30,10 @@ def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> dict:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate user.",
             )
-        return {"email": email, "id": user_id}
+        return CurrentUser(
+            email=email,
+            id=user_id,
+        )
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -11,7 +11,7 @@ async def login_for_access_token_service(
     db: Session,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
-    user = authenticate_user(form_data.username, form_data.password, db)
+    user = authenticate_user(db, form_data)
 
     if not user:
         raise HTTPException(
