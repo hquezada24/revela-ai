@@ -1,20 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import AuthInput from "@/components/auth/AuthInput";
+import { LoginData } from "@/schemas";
+import useAuth from "@/hooks/useAuth";
+import useLogIn from "@/hooks/useLogIn";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mounted, setMounted] = useState(false);
+  const { fetchUser } = useAuth();
+  const { mutateAsync } = useLogIn();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const onSubmit = async (data: LoginData) => {
+    try {
+      await mutateAsync(data);
+      await fetchUser();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`Error message: ${error.message}`);
+      }
+    }
+  };
 
   return (
     <div
@@ -64,14 +75,16 @@ export default function LoginPage() {
         </Link>
 
         {/* Card */}
+        {/* ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"} */}
         <div
-          className={`w-full max-w-sm rounded-3xl p-7 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          className={`w-full max-w-sm rounded-3xl p-7 transition-all duration-700 `}
           style={{
             background: "rgba(16,7,32,0.85)",
             border: `1px solid ${C.border}`,
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
-            boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(109,40,217,0.08)",
+            boxShadow:
+              "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(109,40,217,0.08)",
           }}
         >
           {/* Header */}
@@ -86,7 +99,7 @@ export default function LoginPage() {
               }}
             >
               <Sparkles size={9} />
-              BIENVENIDA DE VUELTA
+              WELCOME
             </div>
             <h1
               style={{
@@ -99,7 +112,7 @@ export default function LoginPage() {
                 letterSpacing: "-0.01em",
               }}
             >
-              Inicia sesión en{" "}
+              Log in to{" "}
               <span
                 style={{
                   background: C.grad,
@@ -115,24 +128,27 @@ export default function LoginPage() {
               className="mt-1.5 text-xs"
               style={{ fontFamily: FONT_UI, color: C.muted, lineHeight: 1.6 }}
             >
-              Accede a tu estilo personalizado con IA
+              Get access to your personalized AI-powered style
             </p>
           </div>
 
           {/* Form */}
-          <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+          <form
+            className="flex flex-col gap-4"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <AuthInput
               id="login-email"
-              label="Correo electrónico"
+              label="Email"
               type="email"
-              placeholder="tu@email.com"
+              placeholder="email@domain.com"
               value={email}
               onChange={setEmail}
               autoComplete="email"
             />
             <AuthInput
               id="login-password"
-              label="Contraseña"
+              label="Password"
               type="password"
               placeholder="••••••••"
               value={password}
@@ -147,13 +163,13 @@ export default function LoginPage() {
                 className="text-xs transition-opacity hover:opacity-100 opacity-70"
                 style={{ fontFamily: FONT_UI, color: C.violet }}
               >
-                ¿Olvidaste tu contraseña?
+                Forgot your password?
               </button>
             </div>
 
             {/* Submit */}
             <button
-              type="submit"
+              onClick={() => onSubmit({ email, password })}
               className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
               style={{
                 fontFamily: FONT_UI,
@@ -161,7 +177,7 @@ export default function LoginPage() {
                 boxShadow: "0 6px 24px rgba(109,40,217,0.45)",
               }}
             >
-              Iniciar sesión <ArrowRight size={15} />
+              Log in <ArrowRight size={15} />
             </button>
 
             {/* Divider */}
@@ -171,7 +187,7 @@ export default function LoginPage() {
                 className="text-[11px]"
                 style={{ fontFamily: FONT_UI, color: C.muted }}
               >
-                o continúa con
+                or continue with
               </span>
               <div className="flex-1 h-px" style={{ background: C.border }} />
             </div>
@@ -216,13 +232,13 @@ export default function LoginPage() {
           className="mt-7 text-xs"
           style={{ fontFamily: FONT_UI, color: C.muted }}
         >
-          ¿No tienes cuenta?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup"
             className="font-semibold transition-opacity hover:opacity-90"
             style={{ color: C.violet }}
           >
-            Regístrate gratis
+            Sign up for free
           </Link>
         </p>
       </div>

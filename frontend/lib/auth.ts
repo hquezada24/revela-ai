@@ -1,48 +1,34 @@
 // lib/auth.ts
 
-import { z } from "zod";
 import { apiFetch } from "./api";
-
-// 1. Define the expected response shape
-const LoginResponseSchema = z.object({
-  token: z.string(),
-  userId: z.string(),
-  expiresIn: z.number(),
-});
-
-// 2. Infer the type from the schema
-type LoginResponse = z.infer<typeof LoginResponseSchema>;
+import {
+  LoginResponse,
+  LoginResponseSchema,
+  UserRead,
+  UserReadSchema,
+} from "@/schemas";
 
 export async function authenticate(
-  loginParam: string,
+  email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const response = await apiFetch("/login", {
+  const response = await apiFetch<LoginResponse>("/api/v1/auth/login", {
     method: "POST",
-    body: JSON.stringify({ login: loginParam, password }),
+    body: JSON.stringify({ email, password }),
   });
 
   return LoginResponseSchema.parse(response);
 }
 
 export async function endSession(): Promise<void> {
-  await apiFetch("/logout", {
+  await apiFetch("/api/v1/auth/logout", {
     method: "POST",
   });
 
   return;
 }
 
-const UserResponseSchema = z.object({
-  id: z.string(),
-  email: z.string(),
-  name: z.string(),
-});
-
-type UserResponse = z.infer<typeof UserResponseSchema>;
-
-export async function loadUser(): Promise<UserResponse> {
-  const res = await apiFetch("/api/me");
-
-  return UserResponseSchema.parse(res);
+export async function loadUser(): Promise<UserRead> {
+  const res = await apiFetch<UserRead>("/api/v1/users/me");
+  return UserReadSchema.parse(res);
 }

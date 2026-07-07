@@ -1,27 +1,32 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, ArrowLeft, Sparkles, User, Bell, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Sparkles, Bell, Check } from "lucide-react";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import AuthInput from "@/components/auth/AuthInput";
 import AuthStepIndicator from "@/components/auth/AuthStepIndicator";
+import useCreateUser from "@/hooks/useCreateUser";
+import useAuth from "@/hooks/useAuth";
 
-const STEPS = ["Cuenta", "Perfil", "Estilo", "¡Listo!"];
-
-const STYLE_GOALS = [
-  { id: "professional", label: "Fotos profesionales", emoji: "📸" },
-  { id: "makeup", label: "Maquillaje", emoji: "💄" },
-  { id: "hair", label: "Peinados", emoji: "💇" },
-  { id: "outfits", label: "Outfits", emoji: "👗" },
-  { id: "color", label: "Análisis de color", emoji: "🎨" },
-  { id: "stylist", label: "Estilista IA", emoji: "✨" },
+const STEPS = [
+  "Account",
+  // "Verify Email",
+  // "Estilo",
+  "Ready!",
 ];
+
+// const STYLE_GOALS = [
+//   { id: "professional", label: "Professional Pictures", emoji: "📸" },
+//   { id: "makeup", label: "Makeup", emoji: "💄" },
+//   { id: "hair", label: "Haircuts", emoji: "💇" },
+//   { id: "outfits", label: "Outfits", emoji: "👗" },
+//   { id: "color", label: "Color analysis", emoji: "🎨" },
+//   { id: "stylist", label: "IA Stylist", emoji: "✨" },
+// ];
 
 export default function SignupPage() {
   const [step, setStep] = useState(0);
-  const [mounted, setMounted] = useState(false);
   const [animDir, setAnimDir] = useState<"forward" | "backward">("forward");
 
   // Step 0: Account
@@ -29,42 +34,63 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const { mutateAsync, isPending, isError, error } = useCreateUser();
+  const { fetchUser } = useAuth();
 
-  // Step 1: Profile
-  const [name, setName] = useState("");
-  const [nameError, setNameError] = useState("");
+  type RegisterData = {
+    email: string;
+    password: string;
+  };
 
-  // Step 2: Style Goals
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  function goNext() {
+  const onSubmit = async (data: RegisterData) => {
     if (step === 0) {
       let ok = true;
       if (!email.includes("@")) {
-        setEmailError("Ingresa un correo válido");
+        setEmailError("Enter a valid email");
         ok = false;
       } else {
         setEmailError("");
       }
       if (password.length < 8) {
-        setPasswordError("Mínimo 8 caracteres");
+        setPasswordError("At least 8 characters");
         ok = false;
       } else {
         setPasswordError("");
       }
       if (!ok) return;
     }
-    if (step === 1) {
-      if (!name.trim()) {
-        setNameError("Por favor ingresa tu nombre");
-        return;
+    try {
+      await mutateAsync(data);
+      goNext();
+      await fetchUser();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`Error message: ${error.message}`);
       }
-      setNameError("");
     }
+  };
+
+  // Step 2: Style Goals
+  // const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+
+  function goNext() {
+    // if (step === 0) {`
+    //   let ok = true;
+    //   if (!email.includes("@")) {
+    //     setEmailError("Enter a valid email");
+    //     ok = false;
+    //   } else {
+    //     setEmailError("");
+    //   }
+    //   if (password.length < 8) {
+    //     setPasswordError("At least 8 characters");
+    //     ok = false;
+    //   } else {
+    //     setPasswordError("");
+    //   }
+    //   if (!ok) return;
+    // }
+
     setAnimDir("forward");
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
@@ -74,11 +100,11 @@ export default function SignupPage() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  function toggleGoal(id: string) {
-    setSelectedGoals((prev) =>
-      prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id]
-    );
-  }
+  // function toggleGoal(id: string) {
+  //   setSelectedGoals((prev) =>
+  //     prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
+  //   );
+  // }
 
   return (
     <div
@@ -109,26 +135,25 @@ export default function SignupPage() {
 
       <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-12">
         {/* Logo */}
-        <Link href="/" className="mb-8">
-          <span
-            style={{
-              fontFamily: FONT_DISPLAY,
-              fontWeight: 700,
-              fontSize: "2rem",
-              fontStyle: "italic",
-              background: C.grad,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Révéla
-          </span>
-        </Link>
+
+        <span
+          style={{
+            fontFamily: FONT_DISPLAY,
+            fontWeight: 700,
+            fontSize: "2rem",
+            fontStyle: "italic",
+            background: C.grad,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Révéla
+        </span>
 
         {/* Card */}
         <div
-          className={`w-full max-w-sm rounded-3xl p-7 transition-all duration-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}
+          className={`w-full max-w-sm rounded-3xl p-7 transition-all duration-700 opacity-100 translate-y-0`}
           style={{
             background: "rgba(16,7,32,0.88)",
             border: `1px solid ${C.border}`,
@@ -142,7 +167,6 @@ export default function SignupPage() {
           <div className="mb-7">
             <AuthStepIndicator steps={STEPS} currentStep={step} />
           </div>
-
           {/* Step Content */}
           <div
             key={step}
@@ -163,7 +187,7 @@ export default function SignupPage() {
                       fontFamily: FONT_UI,
                     }}
                   >
-                    <Sparkles size={9} /> CREA TU CUENTA
+                    <Sparkles size={9} /> CREATE YOUR ACCOUNT
                   </div>
                   <h2
                     style={{
@@ -175,7 +199,7 @@ export default function SignupPage() {
                       lineHeight: 1.15,
                     }}
                   >
-                    Comienza tu{" "}
+                    Start your{" "}
                     <span
                       style={{
                         background: C.grad,
@@ -184,7 +208,7 @@ export default function SignupPage() {
                         backgroundClip: "text",
                       }}
                     >
-                      transformación
+                      transformation
                     </span>
                   </h2>
                   <p
@@ -195,50 +219,9 @@ export default function SignupPage() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Gratis para siempre. Sin tarjeta requerida.
+                    Free always. No card required.
                   </p>
                 </div>
-
-                <AuthInput
-                  id="signup-email"
-                  label="Correo electrónico"
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={setEmail}
-                  autoComplete="email"
-                  error={emailError}
-                />
-                <AuthInput
-                  id="signup-password"
-                  label="Contraseña"
-                  type="password"
-                  placeholder="Mínimo 8 caracteres"
-                  value={password}
-                  onChange={setPassword}
-                  autoComplete="new-password"
-                  error={passwordError}
-                />
-
-                {/* Password strength */}
-                {password.length > 0 && (
-                  <div className="flex gap-1.5">
-                    {[...Array(4)].map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-1 flex-1 rounded-full transition-all duration-300"
-                        style={{
-                          background:
-                            password.length >= (i + 1) * 3
-                              ? i < 2
-                                ? C.pink
-                                : C.violet
-                              : "rgba(255,255,255,0.08)",
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
 
                 {/* Google */}
                 <button
@@ -269,22 +252,63 @@ export default function SignupPage() {
                       fill="#EA4335"
                     />
                   </svg>
-                  Continuar con Google
+                  Sign Up with Google
                 </button>
+
+                <AuthInput
+                  id="signup-email"
+                  label="Email"
+                  type="email"
+                  placeholder="example@email.com"
+                  value={email}
+                  onChange={setEmail}
+                  autoComplete="email"
+                  error={emailError}
+                />
+                <AuthInput
+                  id="signup-password"
+                  label="Password"
+                  type="password"
+                  placeholder="At least 8 characters"
+                  value={password}
+                  onChange={setPassword}
+                  autoComplete="new-password"
+                  error={passwordError}
+                />
+
+                {/* Password strength */}
+                {password.length > 0 && (
+                  <div className="flex gap-1.5">
+                    {[...Array(4)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="h-1 flex-1 rounded-full transition-all duration-300"
+                        style={{
+                          background:
+                            password.length >= (i + 1) * 3
+                              ? i < 2
+                                ? C.pink
+                                : C.violet
+                              : "rgba(255,255,255,0.08)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <p
                   className="text-center text-[11px]"
                   style={{ fontFamily: FONT_UI, color: C.muted }}
                 >
-                  Al registrarte aceptas nuestros{" "}
-                  <span style={{ color: C.violet }}>Términos</span> y{" "}
-                  <span style={{ color: C.violet }}>Privacidad</span>
+                  By registering you accept our{" "}
+                  <span style={{ color: C.violet }}>Terms</span> and{" "}
+                  <span style={{ color: C.violet }}>Privacy</span>
                 </p>
               </div>
             )}
 
             {/* ─── Step 1: Profile ─── */}
-            {step === 1 && (
+            {/* {step === 1 && (
               <div className="flex flex-col gap-5">
                 <div>
                   <div
@@ -296,7 +320,7 @@ export default function SignupPage() {
                       fontFamily: FONT_UI,
                     }}
                   >
-                    <User size={9} /> TU PERFIL
+                    <User size={9} /> Your Profile
                   </div>
                   <h2
                     style={{
@@ -308,7 +332,7 @@ export default function SignupPage() {
                       lineHeight: 1.15,
                     }}
                   >
-                    ¿Cómo te{" "}
+                    Add a {" "}
                     <span
                       style={{
                         background: C.grad,
@@ -332,18 +356,7 @@ export default function SignupPage() {
                   </p>
                 </div>
 
-                <AuthInput
-                  id="signup-name"
-                  label="Nombre o apodo"
-                  type="text"
-                  placeholder="p.ej. Sofía"
-                  value={name}
-                  onChange={setName}
-                  autoComplete="given-name"
-                  error={nameError}
-                />
-
-                {/* Avatar placeholder */}
+               
                 <div className="flex flex-col items-center gap-3 py-4">
                   <div
                     className="relative h-20 w-20 rounded-full flex items-center justify-center"
@@ -369,10 +382,10 @@ export default function SignupPage() {
                   </p>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* ─── Step 2: Style Goals ─── */}
-            {step === 2 && (
+            {/* {step === 1 && (
               <div className="flex flex-col gap-5">
                 <div>
                   <div
@@ -416,7 +429,7 @@ export default function SignupPage() {
                       lineHeight: 1.6,
                     }}
                   >
-                    Selecciona uno o varios. Puedes cambiarlos después.
+                    Select one or more. You can change them later.
                   </p>
                 </div>
 
@@ -464,10 +477,10 @@ export default function SignupPage() {
                   })}
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* ─── Step 3: Done! ─── */}
-            {step === 3 && (
+            {step === 1 && (
               <div className="flex flex-col items-center text-center gap-5 py-2">
                 {/* Success animation */}
                 <div
@@ -493,7 +506,7 @@ export default function SignupPage() {
                       lineHeight: 1.2,
                     }}
                   >
-                    ¡Ya eres parte de{" "}
+                    You are now part of{" "}
                     <span
                       style={{
                         background: C.grad,
@@ -514,7 +527,8 @@ export default function SignupPage() {
                       lineHeight: 1.65,
                     }}
                   >
-                    Tu viaje de transformación está a punto de comenzar. Sube tu primera foto y deja que la IA trabaje la magia.
+                    Tu viaje de transformación está a punto de comenzar. Sube tu
+                    primera foto y deja que la IA trabaje la magia.
                   </p>
                 </div>
 
@@ -532,7 +546,7 @@ export default function SignupPage() {
                       className="text-xs font-semibold"
                       style={{ fontFamily: FONT_UI, color: C.text }}
                     >
-                      Activa notificaciones
+                      Turn on notifications
                     </p>
                     <p
                       className="text-[11px]"
@@ -545,14 +559,12 @@ export default function SignupPage() {
                     className="h-5 w-9 rounded-full relative cursor-pointer"
                     style={{ background: C.grad }}
                   >
-                    <div
-                      className="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-all"
-                    />
+                    <div className="absolute right-0.5 top-0.5 h-4 w-4 rounded-full bg-white transition-all" />
                   </div>
                 </div>
 
                 <Link
-                  href="/"
+                  href={"/"}
                   className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5"
                   style={{
                     fontFamily: FONT_UI,
@@ -560,15 +572,16 @@ export default function SignupPage() {
                     boxShadow: "0 6px 24px rgba(109,40,217,0.45)",
                   }}
                 >
-                  Comenzar mi transformación <ArrowRight size={15} />
+                  Start <ArrowRight size={15} />
                 </Link>
               </div>
             )}
           </div>
-
           {/* Navigation buttons */}
           {step < STEPS.length - 1 && (
-            <div className={`flex gap-3 mt-6 ${step === 0 ? "justify-end" : "justify-between"}`}>
+            <div
+              className={`flex gap-3 mt-6 ${step === 0 ? "justify-end" : "justify-between"}`}
+            >
               {step > 0 && (
                 <button
                   type="button"
@@ -580,22 +593,33 @@ export default function SignupPage() {
                     border: `1px solid ${C.border}`,
                   }}
                 >
-                  <ArrowLeft size={14} /> Atrás
+                  <ArrowLeft size={14} /> Back
                 </button>
               )}
               <button
                 type="button"
-                onClick={goNext}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
+                onClick={() => onSubmit({ email, password })}
+                disabled={isPending}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:active:translate-y-0"
                 style={{
                   fontFamily: FONT_UI,
                   background: C.grad,
                   boxShadow: "0 6px 24px rgba(109,40,217,0.4)",
                 }}
               >
-                {step === 2 ? "Finalizar" : "Continuar"} <ArrowRight size={14} />
+                {/* {step === 1 ? "Finalizar" : "Continue"} <ArrowRight size={14} /> */}
+                {step === 1 ? "Finish" : "Create Account"}{" "}
+                <ArrowRight size={14} />
               </button>
             </div>
+          )}
+          {isError && (
+            <p
+              className="mt-3 text-center text-xs"
+              style={{ fontFamily: FONT_UI, color: C.pink }}
+            >
+              {error instanceof Error ? error.message : "Something went wrong"}
+            </p>
           )}
         </div>
 
@@ -605,13 +629,13 @@ export default function SignupPage() {
             className="mt-7 text-xs"
             style={{ fontFamily: FONT_UI, color: C.muted }}
           >
-            ¿Ya tienes cuenta?{" "}
+            Already have an account?{" "}
             <Link
               href="/login"
               className="font-semibold"
               style={{ color: C.violet }}
             >
-              Inicia sesión
+              Log in
             </Link>
           </p>
         )}

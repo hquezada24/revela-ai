@@ -12,8 +12,6 @@ from app.schemas.user import UserCreate, UserAuthentication
 from app.services.user_service import (
     authenticate_user,
     create_user,
-    get_user_by_email,
-    verify_password,
 )
 from app.schemas.user import CurrentUser, DeleteAccountRequest
 from app.core.auth import get_current_user

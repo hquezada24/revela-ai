@@ -7,6 +7,9 @@ import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import AuthInput from "@/components/auth/AuthInput";
 import useClickOutside from "@/hooks/useClickOutside";
+import useLogIn from "@/hooks/useLogIn";
+import useAuth from "@/hooks/useAuth";
+import { LoginData } from "@/schemas";
 
 interface LoginDialogProps {
   open: boolean;
@@ -18,6 +21,8 @@ export default function LoginDialog({ open, onClose }: LoginDialogProps) {
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { fetchUser } = useAuth();
+  const { mutateAsync } = useLogIn();
 
   useClickOutside(panelRef, () => {
     if (open) onClose();
@@ -49,8 +54,22 @@ export default function LoginDialog({ open, onClose }: LoginDialogProps) {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
+
+  const onSubmit = async (data: LoginData) => {
+    try {
+      console.log("submitting: ", data);
+      await mutateAsync(data);
+      await fetchUser();
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`Error message: ${error.message}`);
+      }
+    }
+  };
 
   if (!open && !visible) return null;
 
@@ -72,9 +91,12 @@ export default function LoginDialog({ open, onClose }: LoginDialogProps) {
           border: `1px solid ${C.border}`,
           boxShadow:
             "0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(109,40,217,0.1)",
-          transform: visible ? "translateY(0) scale(1)" : "translateY(-12px) scale(0.97)",
+          transform: visible
+            ? "translateY(0) scale(1)"
+            : "translateY(-12px) scale(0.97)",
           opacity: visible ? 1 : 0,
-          transition: "transform 0.28s cubic-bezier(0.22,1,0.36,1), opacity 0.28s",
+          transition:
+            "transform 0.28s cubic-bezier(0.22,1,0.36,1), opacity 0.28s",
         }}
       >
         {/* Close button */}
@@ -151,7 +173,13 @@ export default function LoginDialog({ open, onClose }: LoginDialogProps) {
         </div>
 
         {/* Form */}
-        <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit({ email, password });
+          }}
+        >
           <AuthInput
             id="dialog-email"
             label="Correo electrónico"

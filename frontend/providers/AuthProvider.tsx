@@ -1,14 +1,13 @@
 // providers/AuthProvider.tsx
 
 "use client";
-import { createContext, useState, useEffect } from "react";
-import { loadUser, authenticate, endSession } from "@/lib/auth";
-import { UserResponse } from "@/schemas";
+import { createContext, useState, useEffect, useCallback } from "react";
+import { loadUser, endSession } from "@/lib/auth";
+import { UserRead } from "@/schemas";
 
 export const AuthContext = createContext<{
-  user: UserResponse | null;
+  user: UserRead | null;
   isLoading: boolean;
-  login: (loginParam: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchUser: () => Promise<void>;
 } | null>(null);
@@ -19,37 +18,19 @@ export const AuthProvider = ({
   children: React.ReactNode;
 }>) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const [user, setUser] = useState<UserRead | null>(null);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       setIsLoading(true);
       const user = await loadUser();
       setUser(user);
     } catch (error) {
-      console.error("Load user error:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchUser();
   }, []);
-
-  const login = async (loginParam: string, password: string) => {
-    try {
-      setIsLoading(true);
-      await authenticate(loginParam, password);
-    } catch (error) {
-      console.error("Authentication error:", error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-      await fetchUser();
-    }
-  };
 
   const logout = async () => {
     try {
@@ -63,12 +44,15 @@ export const AuthProvider = ({
     }
   };
 
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isLoading,
-        login,
         logout,
         fetchUser,
       }}
