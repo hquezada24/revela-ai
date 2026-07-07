@@ -25,9 +25,9 @@ class UserRead(UserBase):
 class UserCreate(UserBase):
     password: str
 
-# User Authentication
+# User Authentication (JSON body — email + password)
 class UserAuthentication(SQLModel):
-    username: str
+    email: str
     password: str
 
 class CurrentUser(SQLModel):

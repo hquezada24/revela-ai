@@ -21,7 +21,7 @@ def verify_password(hashed_password: str, password: str) -> bool:
     return password_hash.verify(password, hashed_password)
 
 def authenticate_user(db: Session, user_data: UserAuthentication) -> User | None:
-    user = db.exec(select(User).where(User.email == user_data.username)).first()
+    user = db.exec(select(User).where(User.email == user_data.email)).first()
     if not user:
         return None
     if not verify_password(user.hashed_password, user_data.password):

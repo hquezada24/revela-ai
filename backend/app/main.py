@@ -1,13 +1,10 @@
 # app/main.py
 
-from typing import Annotated
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import SQLModel, Session
-from starlette import status
-from app.db.database import engine, get_session
-from app.core.auth import router, get_current_user
-from app.api.v1.endpoints import auth
+from sqlmodel import SQLModel
+from app.db.database import engine
+from app.api.v1.endpoints import auth, users
 
 app = FastAPI(title="Revela AI API")
 
@@ -16,35 +13,24 @@ origins = [
 ]
 
 app.add_middleware(
-    # CORSMiddleware,
-    # allow_origins=origins,
-    # allow_credentials=True,
-    # allow_methods=["*"],
-    # allow_headers=["*"],
     CORSMiddleware,
-    allow_origins=["*"],      # Allows all origins
-    allow_credentials=False,  # Must be False if allow_origins=["*"]
-    allow_methods=["*"],      # Allows all methods
-    allow_headers=["*"],      # Allows all headers
+    allow_origins=origins,
+    allow_credentials=True,  # Required for cookies to be forwarded
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(router)
-
-# Crear todas las tablas si no existen (útil en desarrollo).
-# En producción se usa Alembic para migraciones.
-SQLModel.metadata.create_all(engine)
-
 # ---------------------------------------------------------------------------
-# Dependencias globales
+# Routers
 # ---------------------------------------------------------------------------
-
-db_dependency = Annotated[Session, Depends(get_session)]
-user_dependency = Annotated[dict, Depends(get_current_user)]
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
 
-@app.get("/", status_code=status.HTTP_200_OK)
-async def root(user: user_dependency, db: db_dependency):
-    if user is None:
-        raise HTTPException(status_code=401, detail="Authentication Failed!")
-    return {"user": user}
+# ---------------------------------------------------------------------------
+# Database
+# ---------------------------------------------------------------------------
+
+# Creates all tables if they don't exist (useful in development).
+# In production, use Alembic for migrations.
+SQLModel.metadata.create_all(engine)

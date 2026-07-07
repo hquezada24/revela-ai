@@ -1,42 +1,75 @@
-from fastapi import APIRouter, status, HTTPException
+# app/api/v1/endpoints/auth.py
+
+from datetime import timedelta
 from typing import Annotated
-from fastapi.security import OAuth2PasswordRequestForm
-from fastapi import Depends
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
-from app.schemas.user import UserCreate, DeleteAccountRequest, CurrentUser
-from app.schemas.token import Token
+
+from app.core.security import create_access_token, COOKIE_NAME
 from app.db.database import get_session
-from app.services.user_service import create_user, delete_account, verify_password, get_user_by_email
-from app.services.auth_service import login_for_access_token_service
+from app.schemas.user import UserCreate, UserAuthentication
+from app.services.user_service import (
+    authenticate_user,
+    create_user,
+    get_user_by_email,
+    verify_password,
+)
+from app.schemas.user import CurrentUser, DeleteAccountRequest
 from app.core.auth import get_current_user
 
 router = APIRouter()
+
 db_dependency = Annotated[Session, Depends(get_session)]
 user_dependency = Annotated[CurrentUser, Depends(get_current_user)]
 
-# Register
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+def _set_auth_cookie(response: Response, token: str) -> None:
+    """Attach the JWT as an HttpOnly, Secure, SameSite=lax cookie."""
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=token,
+        httponly=True,
+        secure=False,   # Set to True in production (HTTPS only)
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
+
+
+# ---------------------------------------------------------------------------
+# POST /auth/register
+# ---------------------------------------------------------------------------
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(db: db_dependency, user_data: UserCreate):
-    return create_user(db, user_data)
+async def register(response: Response, db: db_dependency, user_data: UserCreate):
+    user = create_user(db, user_data)
+    token = create_access_token(user.email, user.id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    _set_auth_cookie(response, token)
+    return {"message": "Account created successfully."}
 
-# Log in
-@router.post("/token", response_model=Token)
-async def login_for_access_token(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: db_dependency,
-):
-    return await login_for_access_token_service(db, form_data)
 
-# Delete account
-@router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(body: DeleteAccountRequest, db: db_dependency, current_user: user_dependency):
-    print("Current user: ", current_user)
-    user = get_user_by_email(db, current_user.email)
-
-    if not verify_password(user.hashed_password, body.password):
+# ---------------------------------------------------------------------------
+# POST /auth/login
+# ---------------------------------------------------------------------------
+@router.post("/login", status_code=status.HTTP_200_OK)
+async def login(response: Response, db: db_dependency, user_data: UserAuthentication):
+    user = authenticate_user(db, user_data)
+    if not user:
         raise HTTPException(
-            status_code=401,
-            detail="Incorrect password.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials.",
         )
-    
-    return delete_account(db, current_user.id)
+    token = create_access_token(user.email, user.id, timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    _set_auth_cookie(response, token)
+    return {"message": "Logged in successfully."}
+
+
+# ---------------------------------------------------------------------------
+# POST /auth/logout
+# ---------------------------------------------------------------------------
+@router.post("/logout", status_code=status.HTTP_200_OK)
+async def logout(response: Response):
+    response.delete_cookie(key=COOKIE_NAME, httponly=True, samesite="lax")
+    return {"message": "Logged out successfully."}
+
