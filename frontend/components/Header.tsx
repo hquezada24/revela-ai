@@ -21,6 +21,8 @@ import {
 import useAuth from "@/hooks/useAuth";
 import Avatar from "./Avatar";
 import { motion, AnimatePresence } from "motion/react";
+import { PiOpenAiLogo } from "react-icons/pi";
+import { Banana } from "lucide-react";
 
 const NAV_LINKS = [
   "Features",
@@ -46,6 +48,7 @@ const FEATURE_ITEMS = [
     textColor: "#EC4899",
     border: "rgba(236,72,153,0.25)",
     tag: "HD",
+    link: "/services/portraits",
   },
   {
     name: "Hair Studio",
@@ -55,6 +58,7 @@ const FEATURE_ITEMS = [
     textColor: "#A78BFA",
     border: "rgba(109,40,217,0.25)",
     tag: "3D",
+    link: "/services/hair-studio",
   },
   {
     name: "Virtual Try-On",
@@ -64,6 +68,7 @@ const FEATURE_ITEMS = [
     textColor: "#F59E0B",
     border: "rgba(245,158,11,0.25)",
     tag: "PBR",
+    link: "/services/virtual-try-on",
   },
   {
     name: "Makeup Studio",
@@ -72,6 +77,7 @@ const FEATURE_ITEMS = [
     color: "rgba(168,85,247,0.12)",
     textColor: "#C084FC",
     border: "rgba(168,85,247,0.25)",
+    link: "/services/makeup-studio",
   },
   {
     name: "AI Stylist",
@@ -81,6 +87,7 @@ const FEATURE_ITEMS = [
     textColor: "#60A5FA",
     border: "rgba(59,130,246,0.25)",
     tag: "AI",
+    link: "/services/ai-stylist",
   },
   {
     name: "Color Analysis",
@@ -89,6 +96,7 @@ const FEATURE_ITEMS = [
     color: "rgba(16,185,129,0.12)",
     textColor: "#34D399",
     border: "rgba(16,185,129,0.25)",
+    link: "/services/color-analysis",
   },
 ];
 
@@ -96,7 +104,7 @@ const AI_MODELS = [
   {
     name: "GPT Image 2",
     desc: "Latest model",
-    image: "/models/gpt-image-2.png",
+    image: <PiOpenAiLogo />,
   },
   {
     name: "SD3",
@@ -106,7 +114,7 @@ const AI_MODELS = [
   {
     name: "Nano Banana 2",
     desc: "Nano Banana's model",
-    image: "/models/mj6.png",
+    image: <Banana />,
   },
   {
     name: "Grok Imagine",
@@ -171,7 +179,7 @@ function Header() {
       >
         <div className="mx-auto flex h-17 max-w-7xl items-center justify-between gap-6 px-6 lg:px-10">
           {/* Logo */}
-          <a href="#" style={{ textDecoration: "none", flexShrink: 0 }}>
+          <Link href="/" style={{ textDecoration: "none", flexShrink: 0 }}>
             <span
               style={{
                 fontFamily: FONT_DISPLAY,
@@ -187,7 +195,7 @@ function Header() {
             >
               Révéla
             </span>
-          </a>
+          </Link>
 
           {/* Centre nav */}
           <div
@@ -203,7 +211,8 @@ function Header() {
                       className="relative h-full flex items-center"
                       onMouseEnter={() => handleMenuEnter("Features")}
                     >
-                      <button
+                      <Link
+                        href={"/services"}
                         className="flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm transition-all duration-150 hover:text-text hover:bg-[rgba(255,255,255,0.06)]"
                         style={{
                           fontFamily: FONT_UI,
@@ -228,7 +237,7 @@ function Header() {
                             transition: "transform 0.2s",
                           }}
                         />
-                      </button>
+                      </Link>
                     </div>
                   );
                 }
@@ -299,7 +308,7 @@ function Header() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute left-0 w-[540px] rounded-3xl overflow-hidden"
+                  className="absolute left-0 w-135 rounded-3xl overflow-hidden"
                   style={{
                     top: "calc(100% - 10px)",
                     zIndex: 60,
@@ -328,9 +337,9 @@ function Header() {
                           {FEATURE_ITEMS.map((item) => {
                             const Icon = item.icon;
                             return (
-                              <a
+                              <Link
                                 key={item.name}
-                                href="#features"
+                                href={item.link}
                                 onClick={() => setActiveMenu(null)}
                                 className="group flex gap-4 rounded-2xl p-3 transition-colors duration-200 hover:bg-[rgba(255,255,255,0.04)]"
                                 style={{ textDecoration: "none" }}
@@ -383,7 +392,7 @@ function Header() {
                                     {item.desc}
                                   </p>
                                 </div>
-                              </a>
+                              </Link>
                             );
                           })}
                         </motion.div>
@@ -417,6 +426,7 @@ function Header() {
                                   }}
                                 >
                                   {/* Icon placeholder if needed */}
+                                  {item.image}
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1.5">

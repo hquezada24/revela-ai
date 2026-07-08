@@ -26,7 +26,19 @@ const IMGS = {
   g6: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=380&fit=crop&auto=format",
 };
 
-function BeforeAfterSlider() {
+interface BeforeAfterSliderProps {
+  beforeUrl?: string;
+  afterUrl?: string;
+  aspectRatio?: string;
+  className?: string;
+}
+
+function BeforeAfterSlider({
+  beforeUrl,
+  afterUrl,
+  aspectRatio = "3/4",
+  className = "",
+}: BeforeAfterSliderProps) {
   const [pos, setPos] = useState(42);
   const [dragging, setDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,12 +67,15 @@ function BeforeAfterSlider() {
     };
   }, [dragging, update]);
 
+  const finalBefore = beforeUrl || IMGS.heroBefore;
+  const finalAfter = afterUrl || IMGS.heroAfter;
+
   return (
     <div
       ref={containerRef}
-      className="relative overflow-hidden rounded-3xl select-none w-full h-full"
+      className={`relative overflow-hidden rounded-3xl select-none w-full h-full ${className}`}
       style={{
-        aspectRatio: "3/4",
+        aspectRatio,
         cursor: "col-resize",
         background: C.surface,
         maxWidth: 420,
@@ -76,7 +91,7 @@ function BeforeAfterSlider() {
     >
       {/* Before */}
       <Image
-        src={IMGS.heroBefore}
+        src={finalBefore}
         alt="Before transformation"
         width={1200}
         height={600}
@@ -94,7 +109,7 @@ function BeforeAfterSlider() {
         style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}
       >
         <Image
-          src={IMGS.heroAfter}
+          src={finalAfter}
           width={1200}
           height={600}
           style={{
