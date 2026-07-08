@@ -8,22 +8,12 @@ import AuthInput from "@/components/auth/AuthInput";
 import AuthStepIndicator from "@/components/auth/AuthStepIndicator";
 import useCreateUser from "@/hooks/useCreateUser";
 import useAuth from "@/hooks/useAuth";
+import { LoginData, LoginDataSchema } from "@/schemas";
 
 const STEPS = [
   "Account",
-  // "Verify Email",
-  // "Estilo",
   "Ready!",
 ];
-
-// const STYLE_GOALS = [
-//   { id: "professional", label: "Professional Pictures", emoji: "📸" },
-//   { id: "makeup", label: "Makeup", emoji: "💄" },
-//   { id: "hair", label: "Haircuts", emoji: "💇" },
-//   { id: "outfits", label: "Outfits", emoji: "👗" },
-//   { id: "color", label: "Color analysis", emoji: "🎨" },
-//   { id: "stylist", label: "IA Stylist", emoji: "✨" },
-// ];
 
 export default function SignupPage() {
   const [step, setStep] = useState(0);
@@ -37,27 +27,19 @@ export default function SignupPage() {
   const { mutateAsync, isPending, isError, error } = useCreateUser();
   const { fetchUser } = useAuth();
 
-  type RegisterData = {
-    email: string;
-    password: string;
-  };
-
-  const onSubmit = async (data: RegisterData) => {
+  const onSubmit = async (data: LoginData) => {
     if (step === 0) {
-      let ok = true;
-      if (!email.includes("@")) {
-        setEmailError("Enter a valid email");
-        ok = false;
-      } else {
-        setEmailError("");
+      const result = LoginDataSchema.safeParse(data);
+      if (!result.success) {
+        const fieldErrors = result.error.flatten().fieldErrors;
+        setEmailError(fieldErrors.email?.[0] ? "Enter a valid email" : "");
+        setPasswordError(
+          fieldErrors.password?.[0] ? "At least 8 characters" : "",
+        );
+        return;
       }
-      if (password.length < 8) {
-        setPasswordError("At least 8 characters");
-        ok = false;
-      } else {
-        setPasswordError("");
-      }
-      if (!ok) return;
+      setEmailError("");
+      setPasswordError("");
     }
     try {
       await mutateAsync(data);
@@ -69,9 +51,6 @@ export default function SignupPage() {
       }
     }
   };
-
-  // Step 2: Style Goals
-  // const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
 
   function goNext() {
     // if (step === 0) {`
@@ -99,12 +78,6 @@ export default function SignupPage() {
     setAnimDir("backward");
     setStep((s) => Math.max(s - 1, 0));
   }
-
-  // function toggleGoal(id: string) {
-  //   setSelectedGoals((prev) =>
-  //     prev.includes(id) ? prev.filter((g) => g !== id) : [...prev, id],
-  //   );
-  // }
 
   return (
     <div
@@ -306,178 +279,6 @@ export default function SignupPage() {
                 </p>
               </div>
             )}
-
-            {/* ─── Step 1: Profile ─── */}
-            {/* {step === 1 && (
-              <div className="flex flex-col gap-5">
-                <div>
-                  <div
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold mb-3"
-                    style={{
-                      background: "rgba(109,40,217,0.15)",
-                      color: C.violet,
-                      border: "1px solid rgba(109,40,217,0.25)",
-                      fontFamily: FONT_UI,
-                    }}
-                  >
-                    <User size={9} /> Your Profile
-                  </div>
-                  <h2
-                    style={{
-                      fontFamily: FONT_DISPLAY,
-                      fontWeight: 700,
-                      fontStyle: "italic",
-                      fontSize: "1.75rem",
-                      color: C.text,
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    Add a {" "}
-                    <span
-                      style={{
-                        background: C.grad,
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      llamamos?
-                    </span>
-                  </h2>
-                  <p
-                    className="mt-1.5 text-xs"
-                    style={{
-                      fontFamily: FONT_UI,
-                      color: C.muted,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Tu IA estilista personal te saludará por tu nombre.
-                  </p>
-                </div>
-
-               
-                <div className="flex flex-col items-center gap-3 py-4">
-                  <div
-                    className="relative h-20 w-20 rounded-full flex items-center justify-center"
-                    style={{
-                      background: "rgba(109,40,217,0.12)",
-                      border: "2px dashed rgba(109,40,217,0.35)",
-                    }}
-                  >
-                    <User size={28} style={{ color: C.muted }} />
-                    <button
-                      type="button"
-                      className="absolute -bottom-1 -right-1 h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                      style={{ background: C.grad }}
-                    >
-                      +
-                    </button>
-                  </div>
-                  <p
-                    className="text-xs"
-                    style={{ fontFamily: FONT_UI, color: C.muted }}
-                  >
-                    Foto de perfil (opcional)
-                  </p>
-                </div>
-              </div>
-            )} */}
-
-            {/* ─── Step 2: Style Goals ─── */}
-            {/* {step === 1 && (
-              <div className="flex flex-col gap-5">
-                <div>
-                  <div
-                    className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold mb-3"
-                    style={{
-                      background: "rgba(245,158,11,0.12)",
-                      color: "#F59E0B",
-                      border: "1px solid rgba(245,158,11,0.25)",
-                      fontFamily: FONT_UI,
-                    }}
-                  >
-                    ✦ TUS METAS
-                  </div>
-                  <h2
-                    style={{
-                      fontFamily: FONT_DISPLAY,
-                      fontWeight: 700,
-                      fontStyle: "italic",
-                      fontSize: "1.75rem",
-                      color: C.text,
-                      lineHeight: 1.15,
-                    }}
-                  >
-                    ¿Qué quieres{" "}
-                    <span
-                      style={{
-                        background: C.grad,
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
-                      }}
-                    >
-                      explorar?
-                    </span>
-                  </h2>
-                  <p
-                    className="mt-1.5 text-xs"
-                    style={{
-                      fontFamily: FONT_UI,
-                      color: C.muted,
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    Select one or more. You can change them later.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
-                  {STYLE_GOALS.map((goal) => {
-                    const selected = selectedGoals.includes(goal.id);
-                    return (
-                      <button
-                        key={goal.id}
-                        type="button"
-                        onClick={() => toggleGoal(goal.id)}
-                        className="relative flex flex-col items-start gap-1.5 rounded-2xl p-3.5 text-left transition-all duration-200"
-                        style={{
-                          background: selected
-                            ? "rgba(109,40,217,0.18)"
-                            : "rgba(255,255,255,0.03)",
-                          border: selected
-                            ? "1px solid rgba(109,40,217,0.45)"
-                            : `1px solid ${C.border}`,
-                          boxShadow: selected
-                            ? "0 0 16px rgba(109,40,217,0.2)"
-                            : "none",
-                        }}
-                      >
-                        {selected && (
-                          <div
-                            className="absolute top-2.5 right-2.5 h-4 w-4 rounded-full flex items-center justify-center"
-                            style={{ background: C.grad }}
-                          >
-                            <Check size={9} color="white" />
-                          </div>
-                        )}
-                        <span className="text-lg">{goal.emoji}</span>
-                        <span
-                          className="text-xs font-semibold"
-                          style={{
-                            fontFamily: FONT_UI,
-                            color: selected ? C.text : C.muted,
-                          }}
-                        >
-                          {goal.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )} */}
 
             {/* ─── Step 3: Done! ─── */}
             {step === 1 && (

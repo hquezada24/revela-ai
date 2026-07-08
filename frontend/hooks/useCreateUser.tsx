@@ -1,25 +1,12 @@
-// hooks/useRegister.ts
+// hooks/useCreateUser.tsx
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
-
-type RegisterData = {
-  email: string;
-  password: string;
-};
-
-type RegisterResponse = {
-  id: string;
-  email: string;
-};
+import { registerUser } from "@/lib/auth";
+import { LoginData } from "@/schemas"; // Using LoginData since registration only needs email/password right now
 
 function useCreateUser() {
-  return useMutation<RegisterResponse, Error, RegisterData>({
-    mutationFn: (data: RegisterData) =>
-      apiFetch<RegisterResponse>("/api/v1/auth/register", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+  return useMutation({
+    mutationFn: (data: LoginData) => registerUser(data.email, data.password),
   });
 }
 

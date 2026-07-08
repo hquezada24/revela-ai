@@ -26,7 +26,7 @@ export const AuthProvider = ({
       const user = await loadUser();
       setUser(user);
     } catch (error) {
-      throw error;
+      setUser(null);
     } finally {
       setIsLoading(false);
     }

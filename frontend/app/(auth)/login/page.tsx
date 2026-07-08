@@ -6,17 +6,31 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
 import AuthInput from "@/components/auth/AuthInput";
-import { LoginData } from "@/schemas";
+import { LoginData, LoginDataSchema } from "@/schemas";
 import useAuth from "@/hooks/useAuth";
 import useLogIn from "@/hooks/useLogIn";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const { fetchUser } = useAuth();
   const { mutateAsync } = useLogIn();
 
   const onSubmit = async (data: LoginData) => {
+    const result = LoginDataSchema.safeParse(data);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      setEmailError(fieldErrors.email?.[0] ? "Enter a valid email" : "");
+      setPasswordError(
+        fieldErrors.password?.[0] ? "At least 8 characters" : "",
+      );
+      return;
+    }
+    setEmailError("");
+    setPasswordError("");
+
     try {
       await mutateAsync(data);
       await fetchUser();
@@ -145,6 +159,7 @@ export default function LoginPage() {
               value={email}
               onChange={setEmail}
               autoComplete="email"
+              error={emailError}
             />
             <AuthInput
               id="login-password"
@@ -154,6 +169,7 @@ export default function LoginPage() {
               value={password}
               onChange={setPassword}
               autoComplete="current-password"
+              error={passwordError}
             />
 
             {/* Forgot password */}

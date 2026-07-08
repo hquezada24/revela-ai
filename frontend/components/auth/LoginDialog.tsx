@@ -64,6 +64,7 @@ export default function LoginDialog({ open, onClose }: LoginDialogProps) {
       console.log("submitting: ", data);
       await mutateAsync(data);
       await fetchUser();
+      onClose();
     } catch (error) {
       if (error instanceof Error) {
         console.log(`Error message: ${error.message}`);

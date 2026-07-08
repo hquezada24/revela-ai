@@ -20,6 +20,18 @@ export async function authenticate(
   return LoginResponseSchema.parse(response);
 }
 
+export async function registerUser(
+  email: string,
+  password: string,
+): Promise<LoginResponse> {
+  const response = await apiFetch<LoginResponse>("/api/v1/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+
+  return LoginResponseSchema.parse(response);
+}
+
 export async function endSession(): Promise<void> {
   await apiFetch("/api/v1/auth/logout", {
     method: "POST",
