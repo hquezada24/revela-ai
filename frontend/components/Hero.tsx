@@ -1,8 +1,9 @@
+import Link from "next/link";
 import Section from "./Section";
 import GradText from "./GradText";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
-import { ArrowRight, Upload, Star } from "lucide-react";
+import { ArrowRight, Star, Sparkles } from "lucide-react";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 import Image from "next/image";
 
@@ -100,29 +101,33 @@ function Hero() {
             </p>
 
             <div className="flex items-center gap-3 flex-wrap">
-              <button
+              <Link
+                href="/services"
                 className="flex items-center gap-2.5 rounded-2xl px-7 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:-translate-y-0.5 hover:[box-shadow: 0 14px 40px rgba(109,40,217,0.55)]"
                 style={{
                   fontFamily: FONT_UI,
                   background: C.grad,
                   boxShadow: "0 8px 32px rgba(109,40,217,0.45)",
+                  textDecoration: "none",
                 }}
               >
-                <Upload size={15} />
-                Upload Your Photo
-              </button>
+                <Sparkles size={15} />
+                Start Creating
+              </Link>
 
-              <button
+              <Link
+                href="/pricing"
                 className="flex items-center gap-2 rounded-2xl px-7 py-3.5 text-sm font-semibold transition-all duration-150 hover:border-[rgba(255,255,255,0.2)] hover:bg-[rgba(255,255,255,0.07)]"
                 style={{
                   fontFamily: FONT_UI,
                   color: C.text,
                   border: `1px solid ${C.border}`,
                   background: C.glass,
+                  textDecoration: "none",
                 }}
               >
-                Try the Demo <ArrowRight size={14} />
-              </button>
+                Pricing <ArrowRight size={14} />
+              </Link>
             </div>
 
             {/* Social proof */}

@@ -7,62 +7,113 @@ import SectionLabel from "./SectionLabel";
 import GradText from "./GradText";
 import C from "@/styles/colors";
 import { FONT_UI, FONT_DISPLAY } from "@/styles/fonts";
-import { Palette, Scissors, Shirt, Cpu } from "lucide-react";
+import { AI_MODELS } from "@/data/models";
+import type { LucideIcon } from "lucide-react";
 
-const MODELS = [
+const GLOW_COLORS: {
+  icon: LucideIcon;
+  glow: string;
+  borderColor: string;
+  label: string;
+  color: string;
+  textColor: string;
+  border: string;
+}[] = [
   {
-    name: "Lumina-Skin v4.2",
-    label: "Color & Tone",
-    desc: "Uses advanced spectral mapping to analyze skin undertones, surface tones, and contrast ratios. Automatically suggests your perfect seasonal color palette.",
-    specs: [
-      { name: "Accuracy", value: "99.4%" },
-      { name: "Latency", value: "0.4s" },
-      { name: "Input", value: "Standard Selfie" },
-    ],
-    glow: "rgba(236, 72, 153, 0.15)", // Pink glow
+    icon: AI_MODELS[0].icon,
+    glow: "rgba(236, 72, 153, 0.15)",
     borderColor: "rgba(236, 72, 153, 0.4)",
-    icon: Palette,
+    label: "Image Gen",
+    color: "rgba(236,72,153,0.12)",
+    textColor: "#EC4899",
+    border: "rgba(236,72,153,0.25)",
   },
   {
-    name: "KeraStyle-Net",
-    label: "Hair Studio",
-    desc: "Simulates hair textures, volumes, lengths, and colors while respecting natural facial geometry. Matches styles to your specific face shape.",
-    specs: [
-      { name: "Geometry", value: "3D Face Mesh" },
-      { name: "Resolution", value: "Up to 4K" },
-      { name: "Simulation", value: "Physics Flow" },
-    ],
-    glow: "rgba(109, 40, 217, 0.15)", // Violet glow
+    icon: AI_MODELS[1].icon,
+    glow: "rgba(109, 40, 217, 0.15)",
     borderColor: "rgba(109, 40, 217, 0.4)",
-    icon: Scissors,
+    label: "Diffusion",
+    color: "rgba(109,40,217,0.12)",
+    textColor: "#A78BFA",
+    border: "rgba(109,40,217,0.25)",
   },
   {
-    name: "AuraFit-Outfit",
-    label: "Virtual Try-On",
-    desc: "Maps garments onto your body shape using physics-based drape modeling. Corrects for light directions and fabric folds for a realistic fit.",
-    specs: [
-      { name: "Drape Acc.", value: "98.7%" },
-      { name: "Multi-Angle", value: "360° Mapping" },
-      { name: "Texture", value: "PBR Material" },
-    ],
-    glow: "rgba(245, 158, 11, 0.15)", // Amber glow
+    icon: AI_MODELS[2].icon,
+    glow: "rgba(245, 158, 11, 0.15)",
     borderColor: "rgba(245, 158, 11, 0.4)",
-    icon: Shirt,
+    label: "Specialized",
+    color: "rgba(245,158,11,0.12)",
+    textColor: "#F59E0B",
+    border: "rgba(245,158,11,0.25)",
   },
   {
-    name: "StyleMind LLM",
-    label: "AI Stylist",
-    desc: "A custom fine-tuned multimodal styling assistant trained on millions of luxury fashion lookbooks. Provides instant context-aware style advice.",
-    specs: [
-      { name: "Base Model", value: "Multimodal LLM" },
-      { name: "Data Scale", value: "10M+ Styles" },
-      { name: "Capabilities", value: "Closet Sync" },
-    ],
-    glow: "rgba(168, 85, 247, 0.15)", // Purple glow
+    icon: AI_MODELS[3].icon,
+    glow: "rgba(168, 85, 247, 0.15)",
     borderColor: "rgba(168, 85, 247, 0.4)",
-    icon: Cpu,
+    label: "xAI",
+    color: "rgba(168,85,247,0.12)",
+    textColor: "#C084FC",
+    border: "rgba(168,85,247,0.25)",
+  },
+  {
+    icon: AI_MODELS[4].icon,
+    glow: "rgba(59, 130, 246, 0.15)",
+    borderColor: "rgba(59, 130, 246, 0.4)",
+    label: "Higgsfield",
+    color: "rgba(59,130,246,0.12)",
+    textColor: "#60A5FA",
+    border: "rgba(59,130,246,0.25)",
+  },
+  {
+    icon: AI_MODELS[5].icon,
+    glow: "rgba(16, 185, 129, 0.15)",
+    borderColor: "rgba(16, 185, 129, 0.4)",
+    label: "OpenArt",
+    color: "rgba(16,185,129,0.12)",
+    textColor: "#34D399",
+    border: "rgba(16,185,129,0.25)",
   },
 ];
+
+const SPECS_MAP: Record<string, { name: string; value: string }[]> = {
+  "GPT Image 2": [
+    { name: "Type", value: "Multimodal" },
+    { name: "Resolution", value: "Up to 4K" },
+    { name: "Speed", value: "Fast" },
+  ],
+  SD3: [
+    { name: "Engine", value: "Stable Diffusion" },
+    { name: "Model", value: "SD3" },
+    { name: "Capability", value: "Text-to-Image" },
+  ],
+  "Nano Banana 2": [
+    { name: "Arch", value: "Nano Banana" },
+    { name: "Version", value: "2.0" },
+    { name: "Optimization", value: "Lightweight" },
+  ],
+  "Grok Imagine": [
+    { name: "Provider", value: "xAI" },
+    { name: "Focus", value: "Creative" },
+    { name: "Style", value: "Artistic" },
+  ],
+  "Soul 2.0": [
+    { name: "Provider", value: "Higgsfield" },
+    { name: "Version", value: "2.0" },
+    { name: "Specialty", value: "Portraits" },
+  ],
+  Inpaint: [
+    { name: "Provider", value: "OpenArt" },
+    { name: "Use Case", value: "Inpainting" },
+    { name: "Precision", value: "Pixel-Level" },
+  ],
+};
+
+// Compose AI_MODELS with GLOW_COLORS and SPECS_MAP for display
+const DISPLAY_MODELS = AI_MODELS.map((model, i) => ({
+  ...model,
+  ...GLOW_COLORS[i],
+  specs: SPECS_MAP[model.name] ?? [],
+}));
 
 function AIModels() {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -87,14 +138,14 @@ function AIModels() {
             className="max-w-xl mx-auto mt-6 text-lg"
             style={{ fontFamily: FONT_UI, color: C.muted, lineHeight: 1.7 }}
           >
-            Explore the specialized neural network architectures custom-built to deliver
-            high-fidelity style transformations.
+            Explore the specialized neural network architectures custom-built to
+            deliver high-fidelity style transformations.
           </p>
         </div>
 
         {/* Models Grid */}
         <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto px-4 lg:px-0">
-          {MODELS.map((model, i) => {
+          {DISPLAY_MODELS.map((model, i) => {
             const isHovered = hoveredIdx === i;
             const Icon = model.icon;
 
@@ -190,12 +241,14 @@ function AIModels() {
                   className="grid grid-cols-3 gap-4 pt-6 relative"
                   style={{
                     borderTop: `1px solid ${
-                      isHovered ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.06)"
+                      isHovered
+                        ? "rgba(255,255,255,0.12)"
+                        : "rgba(255,255,255,0.06)"
                     }`,
                     transition: "border-color 0.3s",
                   }}
                 >
-                  {model.specs.map((spec) => (
+                  {model.specs.map((spec: { name: string; value: string }) => (
                     <div key={spec.name} className="flex flex-col">
                       <span
                         className="text-[10px] font-semibold uppercase tracking-wider mb-1"

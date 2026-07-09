@@ -21,8 +21,7 @@ import {
 import useAuth from "@/hooks/useAuth";
 import Avatar from "./Avatar";
 import { motion, AnimatePresence } from "motion/react";
-import { PiOpenAiLogo } from "react-icons/pi";
-import { Banana } from "lucide-react";
+import { AI_MODELS } from "@/data/models";
 
 const NAV_LINKS = [
   "Features",
@@ -97,39 +96,6 @@ const FEATURE_ITEMS = [
     textColor: "#34D399",
     border: "rgba(16,185,129,0.25)",
     link: "/services/color-analysis",
-  },
-];
-
-const AI_MODELS = [
-  {
-    name: "GPT Image 2",
-    desc: "Latest model",
-    image: <PiOpenAiLogo />,
-  },
-  {
-    name: "SD3",
-    desc: "Stable Diffusion 3",
-    image: "/models/sd3.png",
-  },
-  {
-    name: "Nano Banana 2",
-    desc: "Nano Banana's model",
-    image: <Banana />,
-  },
-  {
-    name: "Grok Imagine",
-    desc: "xAI's model",
-    image: "/models/grok-imagine.png",
-  },
-  {
-    name: "Soul 2.0",
-    desc: "Higgsfield's model",
-    image: "/models/sora-3.png",
-  },
-  {
-    name: "Inpaint",
-    desc: "OpenArt AI model",
-    image: "/models/claude-sonnet-5.png",
   },
 ];
 
@@ -410,6 +376,7 @@ function Header() {
                           className="p-6 grid grid-cols-2 gap-4 w-full"
                         >
                           {AI_MODELS.map((item) => {
+                            const Icon = item.icon;
                             return (
                               <a
                                 key={item.name}
@@ -425,8 +392,11 @@ function Header() {
                                     border: `1px solid ${C.border}`,
                                   }}
                                 >
-                                  {/* Icon placeholder if needed */}
-                                  {item.image}
+                                  <Icon
+                                    size={16}
+                                    style={{ color: C.pink }}
+                                    className="group-hover:scale-110 transition-transform duration-200"
+                                  />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1.5">

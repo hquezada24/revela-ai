@@ -10,7 +10,11 @@ interface ServiceHeaderProps {
   title: string;
   description: string;
   badge: string;
-  icon?: React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>;
+  icon?: React.ComponentType<{
+    size?: number;
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
 }
 
 export default function ServiceHeader({
@@ -22,24 +26,34 @@ export default function ServiceHeader({
   return (
     <div className="relative w-full pt-10 pb-8 overflow-hidden">
       {/* Ambient background glow for headers */}
-      <div className="pointer-events-none absolute -top-24 left-10 h-48 w-48 rounded-full opacity-10 blur-[60px]"
+      <div
+        className="pointer-events-none absolute -top-24 left-10 h-48 w-48 rounded-full opacity-10 blur-[60px]"
         style={{ background: C.violet }}
       />
-      <div className="pointer-events-none absolute -top-16 right-20 h-36 w-36 rounded-full opacity-10 blur-[50px]"
+      <div
+        className="pointer-events-none absolute -top-16 right-20 h-36 w-36 rounded-full opacity-10 blur-[50px]"
         style={{ background: C.pink }}
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-10">
         {/* Breadcrumbs */}
         <div
           className="flex items-center gap-1.5 mb-5 text-xs font-semibold"
           style={{ fontFamily: FONT_UI, color: C.muted }}
         >
-          <Link href="/" className="hover:text-white transition-colors" style={{ textDecoration: "none" }}>
+          <Link
+            href="/"
+            className="hover:text-white transition-colors"
+            style={{ textDecoration: "none" }}
+          >
             Home
           </Link>
           <ChevronRight size={10} />
-          <Link href="/services" className="hover:text-white transition-colors" style={{ textDecoration: "none" }}>
+          <Link
+            href="/services"
+            className="hover:text-white transition-colors"
+            style={{ textDecoration: "none" }}
+          >
             Services
           </Link>
           <ChevronRight size={10} />
