@@ -23,7 +23,12 @@ class JobBase(SQLModel):
 
     error_message: str | None = None
 
-    output: dict | None = None
+    output: dict | None = Field(
+        default=None,
+        sa_column=Column(JSONB)
+    )
+    
+    tool: Tool
 
     started_at: datetime | None = None
 
@@ -40,5 +45,4 @@ class JobRead(JobBase):
 
 class JobCreate(SQLModel):
     input_data: dict = Field(sa_column=Column(JSONB))
-
     tool: Tool
