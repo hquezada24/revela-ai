@@ -30,7 +30,7 @@ export default function OptionCard({
       type="button"
       onClick={onClick}
       className={`group relative flex flex-col items-center justify-center rounded-2xl p-4 transition-all duration-300 w-full overflow-hidden text-left outline-none ${
-        image ? "aspect-square" : "min-h-[70px]"
+        image ? "aspect-square" : "min-h-17.5"
       } ${className}`}
       style={{
         background: selected ? "rgba(109,40,217,0.12)" : C.glass,
@@ -49,7 +49,7 @@ export default function OptionCard({
             sizes="(max-width: 640px) 50vw, 25vw"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(7,3,15,0.9)] via-[rgba(7,3,15,0.4)] to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-[rgba(7,3,15,0.9)] via-[rgba(7,3,15,0.4)] to-transparent" />
         </div>
       )}
 
@@ -84,7 +84,9 @@ export default function OptionCard({
           <div
             className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl transition-colors duration-200"
             style={{
-              background: selected ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.03)",
+              background: selected
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(255,255,255,0.03)",
               border: `1px solid ${selected ? "rgba(109,40,217,0.3)" : C.border}`,
             }}
           >

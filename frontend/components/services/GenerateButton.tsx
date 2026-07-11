@@ -1,6 +1,4 @@
 "use client";
-
-import React from "react";
 import C from "@/styles/colors";
 import { FONT_UI } from "@/styles/fonts";
 import { Sparkles } from "lucide-react";
@@ -37,7 +35,9 @@ export default function GenerateButton({
       style={{
         fontFamily: FONT_UI,
         background: C.grad,
-        boxShadow: isButtonDisabled ? "none" : "0 8px 24px rgba(109,40,217,0.4)",
+        boxShadow: isButtonDisabled
+          ? "none"
+          : "0 8px 24px rgba(109,40,217,0.4)",
         border: "none",
         cursor: isButtonDisabled ? "not-allowed" : "pointer",
       }}
@@ -49,7 +49,10 @@ export default function GenerateButton({
         </>
       ) : (
         <>
-          <Sparkles size={16} className="text-white group-hover:animate-pulse" />
+          <Sparkles
+            size={16}
+            className="text-white group-hover:animate-pulse"
+          />
           <span>{text}</span>
         </>
       )}

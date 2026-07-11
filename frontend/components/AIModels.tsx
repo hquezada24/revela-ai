@@ -154,7 +154,7 @@ function AIModels() {
                 key={model.name}
                 onMouseEnter={() => setHoveredIdx(i)}
                 onMouseLeave={() => setHoveredIdx(null)}
-                className="relative rounded-[2rem] p-8 flex flex-col transition-all duration-300 transform"
+                className="relative rounded-4xl p-8 flex flex-col transition-all duration-300 transform"
                 style={{
                   background: C.glass,
                   border: `1px solid ${isHovered ? model.borderColor : C.border}`,

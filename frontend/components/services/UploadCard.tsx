@@ -10,7 +10,7 @@ interface UploadCardProps {
   label: string;
   description?: string;
   onUpload: (file: File | null) => void;
-  value: File | null;
+  value: File | undefined;
   className?: string;
 }
 

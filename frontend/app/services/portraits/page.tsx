@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Camera, Crop, Images, Wand2 } from "lucide-react";
 import C from "@/styles/colors";
 import { FONT_UI } from "@/styles/fonts";
@@ -11,10 +11,15 @@ import OptionCard from "@/components/services/OptionCard";
 import AdvancedSettings from "@/components/services/AdvancedSettings";
 import GenerateButton from "@/components/services/GenerateButton";
 import ResultCard from "@/components/services/ResultCard";
+import { PortraitSchema, PortraitCreate } from "@/schemas/portraits.schema";
+import { z } from "zod";
+import useGeneratePortrait from "@/hooks/useGeneratePortrait";
+import useJob from "@/hooks/useJob";
 
 type PortraitStyle = "studio" | "executive" | "creative" | "cinematic";
 type Aspect = "1:1" | "3:4" | "4:5";
 type Count = 1 | 2 | 4;
+type PortraitDraft = Partial<z.infer<typeof PortraitSchema>>;
 
 const STYLE_OPTIONS: { id: PortraitStyle; label: string; badge?: string }[] = [
   { id: "studio", label: "Studio Natural", badge: "Best" },
@@ -59,46 +64,60 @@ const EXAMPLES = [
 ];
 
 export default function PortraitsServicePage() {
-  const [portrait, setPortrait] = useState<File | null>(null);
-  const [style, setStyle] = useState<PortraitStyle>("studio");
-  const [aspect, setAspect] = useState<Aspect>("3:4");
-  const [count, setCount] = useState<Count>(2);
-  const [advanced, setAdvanced] = useState("");
-
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [resultUrl, setResultUrl] = useState<string | undefined>(undefined);
-  const [beforePreviewUrl, setBeforePreviewUrl] = useState<string | undefined>(undefined);
-
-  const canGenerate = Boolean(portrait);
+  const [beforePreviewUrl, setBeforePreviewUrl] = useState<string | undefined>(
+    undefined,
+  );
+  const { mutateAsync } = useGeneratePortrait();
+  const [input, setInput] = useState<PortraitDraft>({});
+  const [jobId, setJobId] = useState<number | null>(null);
+  const { data: job } = useJob(jobId);
+  const canGenerate = PortraitSchema.safeParse(input).success;
 
   useEffect(() => {
-    if (!portrait) {
+    if (!input?.image) {
       setBeforePreviewUrl(undefined);
       return;
     }
-    const url = URL.createObjectURL(portrait);
+    const url = URL.createObjectURL(input?.image);
     setBeforePreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [portrait]);
+  }, [input?.image]);
 
-  const generate = () => {
-    if (!canGenerate) return;
-    setIsGenerating(true);
-    setProgress(0);
-    setResultUrl(undefined);
+  const generate = async (data: PortraitCreate) => {
+    try {
+      setIsGenerating(true);
+      setResultUrl(undefined);
 
-    let p = 0;
-    const timer = window.setInterval(() => {
-      p = Math.min(100, p + 6 + Math.round(Math.random() * 8));
-      setProgress(p);
-      if (p >= 100) {
-        window.clearInterval(timer);
-        setIsGenerating(false);
-        setResultUrl("https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&h=1200&fit=crop&auto=format");
+      const job = await mutateAsync(data);
+
+      setJobId(job.id);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log(`Error message: ${error.message}`);
       }
-    }, 260);
+      setIsGenerating(false);
+    }
   };
+
+  useEffect(() => {
+    if (!job) return;
+
+    if (job.status === "completed") {
+      // setResultUrl(job?.output?.images[0]);
+      setResultUrl(
+        "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&h=1200&fit=crop&auto=format",
+      );
+
+      setIsGenerating(false);
+    }
+
+    if (job.status === "failed") {
+      setIsGenerating(false);
+    }
+  }, [job]);
 
   const reset = () => {
     setIsGenerating(false);
@@ -120,12 +139,26 @@ export default function PortraitsServicePage() {
         examples={EXAMPLES}
         sidebar={
           <div>
-            <UploadCard label="Upload Portrait" description="Front-facing photos work best" value={portrait} onUpload={setPortrait} />
+            <UploadCard
+              label="Upload Portrait"
+              description="Front-facing photos work best"
+              value={input?.image}
+              onUpload={(file) => {
+                if (!file) return;
+                setInput((prev: PortraitDraft) => ({
+                  ...prev,
+                  image: file,
+                }));
+              }}
+            />
 
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Wand2 size={14} style={{ color: C.pink }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: FONT_UI, color: C.text }}>
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ fontFamily: FONT_UI, color: C.text }}
+                >
                   Style
                 </span>
               </div>
@@ -133,8 +166,13 @@ export default function PortraitsServicePage() {
                 {STYLE_OPTIONS.map((o) => (
                   <OptionCard
                     key={o.id}
-                    selected={style === o.id}
-                    onClick={() => setStyle(o.id)}
+                    selected={input?.style === o.id}
+                    onClick={() =>
+                      setInput((prev: PortraitDraft) => ({
+                        ...prev,
+                        style: o.id,
+                      }))
+                    }
                     label={o.label}
                     badge={o.badge}
                   />
@@ -145,13 +183,26 @@ export default function PortraitsServicePage() {
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Crop size={14} style={{ color: C.pink }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: FONT_UI, color: C.text }}>
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ fontFamily: FONT_UI, color: C.text }}
+                >
                   Aspect Ratio
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {ASPECT_OPTIONS.map((o) => (
-                  <OptionCard key={o.id} selected={aspect === o.id} onClick={() => setAspect(o.id)} label={o.label} />
+                  <OptionCard
+                    key={o.id}
+                    selected={input?.aspect === o.id}
+                    onClick={() =>
+                      setInput((prev: PortraitDraft) => ({
+                        ...prev,
+                        aspect: o.id,
+                      }))
+                    }
+                    label={o.label}
+                  />
                 ))}
               </div>
             </div>
@@ -159,25 +210,46 @@ export default function PortraitsServicePage() {
             <div className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <Images size={14} style={{ color: C.pink }} />
-                <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: FONT_UI, color: C.text }}>
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ fontFamily: FONT_UI, color: C.text }}
+                >
                   Output Count
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {COUNT_OPTIONS.map((o) => (
-                  <OptionCard key={o.id} selected={count === o.id} onClick={() => setCount(o.id)} label={o.label} />
+                  <OptionCard
+                    key={o.id}
+                    selected={input?.count === o.id}
+                    onClick={() =>
+                      setInput((prev: PortraitDraft) => ({
+                        ...prev,
+                        count: o.id,
+                      }))
+                    }
+                    label={o.label}
+                  />
                 ))}
               </div>
             </div>
 
             <AdvancedSettings title="Optional Instructions">
               <div className="space-y-2">
-                <label className="text-xs font-semibold" style={{ fontFamily: FONT_UI, color: C.text }}>
+                <label
+                  className="text-xs font-semibold"
+                  style={{ fontFamily: FONT_UI, color: C.text }}
+                >
                   Additional notes
                 </label>
                 <textarea
-                  value={advanced}
-                  onChange={(e) => setAdvanced(e.target.value)}
+                  value={input?.prompt ?? ""}
+                  onChange={(e) =>
+                    setInput((prev: PortraitDraft) => ({
+                      ...prev,
+                      prompt: e.target.value,
+                    }))
+                  }
                   placeholder="Ex: neutral background, subtle smile, no heavy retouching..."
                   className="w-full rounded-2xl p-3 text-sm outline-none"
                   style={{
@@ -194,14 +266,26 @@ export default function PortraitsServicePage() {
 
             <div className="mt-6">
               <GenerateButton
-                onClick={generate}
+                onClick={() => {
+                  const result = PortraitSchema.safeParse(input);
+
+                  if (!result.success) {
+                    console.log(result.error);
+                    return;
+                  }
+
+                  generate({ input_data: result.data, tool: "portrait" });
+                }}
                 loading={isGenerating}
                 disabled={!canGenerate}
                 text="Generate portraits"
                 loadingText="Rendering portraits..."
               />
               {!canGenerate && (
-                <p className="text-xs mt-3" style={{ fontFamily: FONT_UI, color: C.muted }}>
+                <p
+                  className="text-xs mt-3"
+                  style={{ fontFamily: FONT_UI, color: C.muted }}
+                >
                   Upload a portrait to unlock generation.
                 </p>
               )}
@@ -221,4 +305,3 @@ export default function PortraitsServicePage() {
     </div>
   );
 }
-
