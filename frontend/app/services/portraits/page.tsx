@@ -11,15 +11,23 @@ import OptionCard from "@/components/services/OptionCard";
 import AdvancedSettings from "@/components/services/AdvancedSettings";
 import GenerateButton from "@/components/services/GenerateButton";
 import ResultCard from "@/components/services/ResultCard";
-import { PortraitSchema, PortraitCreate } from "@/schemas/portraits.schema";
+import {
+  PromptSchema,
+  Prompt,
+  GetPresignedURL,
+  GetPresignedURLSchema,
+  PresignedURL,
+} from "@/schemas/portraits.schema";
 import { z } from "zod";
 import useGeneratePortrait from "@/hooks/useGeneratePortrait";
 import useJob from "@/hooks/useJob";
+import usePresignedURL from "@/hooks/usePresignedURL";
+import useUploadToR2 from "@/hooks/useUploadToR2";
 
 type PortraitStyle = "studio" | "executive" | "creative" | "cinematic";
 type Aspect = "1:1" | "3:4" | "4:5";
 type Count = 1 | 2 | 4;
-type PortraitDraft = Partial<z.infer<typeof PortraitSchema>>;
+type PortraitDraft = Partial<z.infer<typeof PromptSchema>>;
 
 const STYLE_OPTIONS: { id: PortraitStyle; label: string; badge?: string }[] = [
   { id: "studio", label: "Studio Natural", badge: "Best" },
@@ -66,37 +74,76 @@ const EXAMPLES = [
 export default function PortraitsServicePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [fileInfo, setFileInfo] = useState<GetPresignedURL>({
+    filename: "",
+    content_type: "",
+  });
   const [resultUrl, setResultUrl] = useState<string | undefined>(undefined);
   const [beforePreviewUrl, setBeforePreviewUrl] = useState<string | undefined>(
     undefined,
   );
-  const { mutateAsync } = useGeneratePortrait();
+  const { mutateAsync: generatePortrait } = useGeneratePortrait();
   const [input, setInput] = useState<PortraitDraft>({});
+  const [file, setFile] = useState<File>();
   const [jobId, setJobId] = useState<number | null>(null);
   const { data: job } = useJob(jobId);
-  const canGenerate = PortraitSchema.safeParse(input).success;
+  const { mutateAsync: getPresignedURL } = usePresignedURL();
+  const { mutateAsync: uploadToR2 } = useUploadToR2();
+  const canGenerate =
+    PromptSchema.safeParse(input).success && file !== undefined;
 
   useEffect(() => {
-    if (!input?.image) {
+    if (!file) {
       setBeforePreviewUrl(undefined);
       return;
     }
-    const url = URL.createObjectURL(input?.image);
+    if (file) {
+      setFileInfo({
+        filename: file.name,
+        content_type: file.type,
+      });
+    }
+    const url = URL.createObjectURL(file);
     setBeforePreviewUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [input?.image]);
+  }, [file]);
 
-  const generate = async (data: PortraitCreate) => {
+  const generate = async (fileInfo: GetPresignedURL, data: Prompt) => {
     try {
+      if (!canGenerate) {
+        return;
+      }
       setIsGenerating(true);
       setResultUrl(undefined);
 
-      const job = await mutateAsync(data);
+      // Validate File and Input Data
+      GetPresignedURLSchema.parse(fileInfo);
+
+      // Obtain presigned url to upload file to R2
+      const presignedURL: PresignedURL = await getPresignedURL(fileInfo);
+
+      // Upload picture
+      const isUploaded = await uploadToR2({
+        uploadUrl: presignedURL.upload_url,
+        file,
+      });
+
+      // Throw error if picture was not uploaded
+      if (!isUploaded) {
+        throw new Error("Failed to upload picture");
+      }
+
+      // Now generate the image
+      const job = await generatePortrait({
+        input_data: data,
+        tool: "portrait",
+        input_image_keys: [presignedURL.object_key],
+      });
 
       setJobId(job.id);
     } catch (error) {
       if (error instanceof Error) {
-        console.log(`Error message: ${error.message}`);
+        console.error(`Error message: ${error.message}`);
       }
       setIsGenerating(false);
     }
@@ -104,6 +151,7 @@ export default function PortraitsServicePage() {
 
   useEffect(() => {
     if (!job) return;
+    if (!jobId) return;
 
     if (job.status === "completed") {
       // setResultUrl(job?.output?.images[0]);
@@ -117,7 +165,7 @@ export default function PortraitsServicePage() {
     if (job.status === "failed") {
       setIsGenerating(false);
     }
-  }, [job]);
+  }, [job, jobId]);
 
   const reset = () => {
     setIsGenerating(false);
@@ -142,13 +190,10 @@ export default function PortraitsServicePage() {
             <UploadCard
               label="Upload Portrait"
               description="Front-facing photos work best"
-              value={input?.image}
+              value={file}
               onUpload={(file) => {
                 if (!file) return;
-                setInput((prev: PortraitDraft) => ({
-                  ...prev,
-                  image: file,
-                }));
+                setFile(file);
               }}
             />
 
@@ -267,14 +312,16 @@ export default function PortraitsServicePage() {
             <div className="mt-6">
               <GenerateButton
                 onClick={() => {
-                  const result = PortraitSchema.safeParse(input);
+                  const result = PromptSchema.safeParse(input);
 
                   if (!result.success) {
-                    console.log(result.error);
+                    console.error(result.error);
                     return;
                   }
 
-                  generate({ input_data: result.data, tool: "portrait" });
+                  generate(fileInfo, result.data);
+
+                  // generate({ input_data: result.data, tool: "portrait" });
                 }}
                 loading={isGenerating}
                 disabled={!canGenerate}

@@ -6,6 +6,7 @@ function useJob(jobId: number | null) {
   return useQuery({
     queryKey: ["job", jobId],
     queryFn: () => getJob(jobId),
+    enabled: jobId !== null,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
 

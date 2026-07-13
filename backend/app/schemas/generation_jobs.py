@@ -5,6 +5,8 @@ from enum import Enum
 from sqlalchemy import Column
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import SQLModel, Field
+from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import String
 
 
 class JobStatus(str, Enum):
@@ -18,6 +20,11 @@ class Tool(str, Enum):
 
 class JobBase(SQLModel):
     status: JobStatus
+
+    input_image_keys: list[str] = Field(
+    default_factory=list,
+    sa_column=Column(ARRAY(String), nullable=True),
+)
 
     progress: int | None = None
 
@@ -46,3 +53,4 @@ class JobRead(JobBase):
 class JobCreate(SQLModel):
     input_data: dict = Field(sa_column=Column(JSONB))
     tool: Tool
+    input_image_keys: list[str]

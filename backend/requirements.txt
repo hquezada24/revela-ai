@@ -36,12 +36,14 @@ httpx
 
 # AI / Computer Vision Utilities
 
+pillow
 opencv-python
 mediapipe
 
 # Validation & Serialization
 
 email-validator
+python-magic
 
 # Development & Testing
 
@@ -52,3 +54,8 @@ pytest-asyncio
 
 ruff
 mypy
+
+# Gemini AI
+
+google-genai 
+

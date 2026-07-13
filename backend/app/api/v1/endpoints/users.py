@@ -5,14 +5,12 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 from app.core.auth import get_current_user
 from app.db.database import get_session
-from app.schemas.user import CurrentUser, UserRead
+from app.schemas.user import CurrentUser, UserRead, DeleteAccountRequest
 from app.services.user_service import get_user_by_id, get_user_by_email, verify_password
 from fastapi import HTTPException
 from starlette import status
 from app.core.security import COOKIE_NAME
-from app.db.database import get_session
 from fastapi import Response
-from app.schemas.user import CurrentUser, DeleteAccountRequest
 
 router = APIRouter()
 

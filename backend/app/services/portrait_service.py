@@ -9,7 +9,8 @@ def create_portrait(db: Session, user_id: int, data: JobCreate):
         user_id=user_id,
         status="queued",
         input_data=data.input_data,
-        tool=data.tool
+        tool=data.tool,
+        input_image_keys=data.input_image_keys
     )
 
     db.add(job)
